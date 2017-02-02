@@ -19,7 +19,12 @@ How to run spacyapp ?
 
 execute: python manage.py runserver
 
-open browser e.g. http://localhost:8000/spacyapp/similarity/?s=drone%20stop%20now
+call HTTP GET http://localhost:8000/spacyapp/similarity/?s=drone%20stop%20now
+
+return stop
+
+
+The key here is user must says at least one VERB that is having 'highest similarity or equals to' pre-defined commands in system.
 
 stop VERB 0.649615358913 = start
 
@@ -32,5 +37,3 @@ stop VERB 0.610306594989 = right
 stop VERB 0.56040019562 = up
 
 stop VERB 0.574057983567 = down
-
-The key here is user must says at least one VERB that is having 'highest similarity or equals to' pre-defined commands in system.
