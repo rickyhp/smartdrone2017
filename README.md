@@ -7,7 +7,7 @@ You can setup python3 virtual environment in your system and install python3 + d
 
 What is spacyapp ?
 
-The idea is to build web services for voice recognition and also for drone to be able to understand natural English language.
+The idea is to build web services for drone to understand natural English language.
 Our smartphone apps receive user instructions from microphone, convert it to text via google cloud speech api and pass this text
 to spacyapp. Spacyapp will process and return exact command text (pre-defined in our system e.g. stop).
 
