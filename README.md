@@ -33,4 +33,4 @@ stop VERB 0.56040019562 = up
 
 stop VERB 0.574057983567 = down
 
-
+The key here is user must says at least one VERB that is having 'highest similarity or equals to' pre-defined commands in system.
