@@ -22,9 +22,15 @@ execute: python manage.py runserver
 open browser e.g. http://localhost:8000/spacyapp/similarity/?s=drone%20stop%20now
 
 stop VERB 0.649615358913 = start
+
 stop VERB 1.00000000366 = stop
+
 stop VERB 0.410976274631 = left
+
 stop VERB 0.610306594989 = right
+
 stop VERB 0.56040019562 = up
+
 stop VERB 0.574057983567 = down
+
 
