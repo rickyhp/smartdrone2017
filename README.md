@@ -15,17 +15,18 @@ For example:
 User says "Drone, please stop now"
 Spacy returns "stop" and send to our Rasp PI server side code and call respective multiwii codes to stop the rotors.
 
-How to run spacyapp ?
+How to run spacyapp server ?
 
 execute: python manage.py runserver
 
 call HTTP GET http://localhost:8000/spacyapp/similarity/?s=drone%20stop%20now
 
-return stop
+return {"command" : "stop" , "p" : 1.000000000399}
 
 
 The key here is user must says at least one VERB that is having 'highest similarity or equals to' pre-defined commands in system.
 
+Ex.
 stop VERB 0.649615358913 = start
 
 stop VERB 1.00000000366 = stop
@@ -37,3 +38,6 @@ stop VERB 0.610306594989 = right
 stop VERB 0.56040019562 = up
 
 stop VERB 0.574057983567 = down
+
+The benefit of using Spacy NLP framework, it allows users to speak to drone in more 'human friendly' manner rather than just simple command.
+You can say "drone stop now okay" rather than just "stop".
