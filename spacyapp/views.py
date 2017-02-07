@@ -36,7 +36,9 @@ def similarity(request):
             message = json_data['speech']
         except KeyError:
             HttpResponseServerError("Malformed data")
-    
+    elif request.method == 'GET':
+        message = request.GET.get("s")
+        
     en_doc = en_nlp(message) # text from client
     cmd = en_nlp(commands)   # list of pre-defined commands
     resp={}
