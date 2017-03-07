@@ -25,6 +25,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         pass
  
     def on_message(self, message):
+        if(message == "arm"):
+            print("armed")
+        if(message == "disarm"):
+            print("disarmed")
+            
         self.write_message(u"Your message was: " + message)
  
     def on_close(self):
