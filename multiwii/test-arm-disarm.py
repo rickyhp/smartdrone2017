@@ -17,7 +17,7 @@ import time
 if __name__ == "__main__":
 
     #board = MultiWii("/dev/tty.usbserial-AM016WP4")
-    board = MultiWii("/dev/ttyUSB0")
+    board = MultiWii("/dev/tty.SLAB_USBtoUART")
     try:
         board.arm()
         print "Board is armed now!"
