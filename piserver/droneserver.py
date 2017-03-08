@@ -25,12 +25,23 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         pass
  
     def on_message(self, message):
-        if(message == "arm"):
-            print("armed")
-        if(message == "disarm"):
-            print("disarmed")
+        print("received = " + message)
+        
+        reply = "Sorry, I didn't understand " + message
+        
+        if(message == "arm" or message == "start"):
+            reply = "arm completed"
+        
+        if(message == "disarm" or message == "stop"):
+            reply = "disarm completed"
+        
+        if(message == "altitude"):
+            reply = "Currently auto drone altitude is at 10m above sea level"
             
-        self.write_message(u"Your message was: " + message)
+        if(message == "hello"):
+            reply = "hello from the other side"
+        
+        self.write_message(reply)
  
     def on_close(self):
         pass
@@ -55,7 +66,9 @@ class Application(tornado.web.Application):
  
  
 if __name__ == '__main__':
+    port = 8080
     ws_app = Application()
     server = tornado.httpserver.HTTPServer(ws_app)
-    server.listen(8080)
+    server.listen(port)
+    print("droneserver started on " + str(port))
     tornado.ioloop.IOLoop.instance().start()
