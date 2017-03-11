@@ -21,6 +21,14 @@ var hints = document.querySelector('.hints');
 
 hints.innerHTML = 'Tap/click then talk to auto drone. Try altitude.';
 
+function reqListener () {
+  console.log("Your extracted voice command : " + this.responseText);
+  var extractedCommand = JSON.parse(this.responseText);
+  diagnostic.textContent = "Your extracted voice command : " + extractedCommand.command;
+  callDrone(extractedCommand.command);
+}
+
+
 document.body.onclick = function() {
   recognition.start();
   console.log('Ready to receive command.');
@@ -41,6 +49,15 @@ function callDrone(msg) {
     ws.send(msg);
 }
 
+function extractCommand(msg)
+{
+  var oReq = new XMLHttpRequest();
+  oReq.addEventListener("load", reqListener);
+  oReq.open("GET", "http://localhost:8000/spacyapp/similarity/?s=" + msg);
+  oReq.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+  oReq.send();
+}
+
 recognition.onresult = function(event) {
   // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
   // The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
@@ -52,13 +69,10 @@ recognition.onresult = function(event) {
   // We then return the transcript property of the SpeechRecognitionAlternative object
 
   var last = event.results.length - 1;
-  var voicecommand = event.results[last][0].transcript;
-
-  diagnostic.textContent = 'Your voice command: ' + voicecommand + '.';
+  var voicecommand = event.results[last][0].transcript; 
+  console.log("Complete voice command : " + voicecommand);
+  extractCommand(voicecommand);
   
-  // send command to droneserver.py
-  callDrone(voicecommand);
-    
   console.log('Confidence: ' + event.results[0][0].confidence);
 }
 
