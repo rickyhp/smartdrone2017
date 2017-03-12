@@ -7,7 +7,7 @@ for subdir, dirs, files in os.walk('../pictures/input'):
     for file in files:
         filepath = subdir + os.sep + file
 
-        if filepath.endswith(".png"):
+        if filepath.endswith(".jpg"):
             i += 1
             img = cv2.imread(filepath)
 
