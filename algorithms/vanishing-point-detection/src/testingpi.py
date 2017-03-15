@@ -16,12 +16,36 @@ time.sleep(0.1)
 kernel = np.ones((15, 15), np.uint8)
 
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-    image = frame.array
+    img = frame.array
 
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+ #   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+ #   opening = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)  # Open (erode, then dilate)
+ #   edges = cv2.Canny(opening, 50, 150, apertureSize=3)  # Canny edge detection
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # Convert image to grayscale
+
+    kernel = np.ones((15, 15), np.uint8)
     opening = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)  # Open (erode, then dilate)
+    
     edges = cv2.Canny(opening, 50, 150, apertureSize=3)  # Canny edge detection
     
+    #lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)  # Hough line detection
+    #hough_lines = []
+
+    # Lines are represented by rho, theta; convert to endpoint notation
+    #for line in lines:
+    #    for rho, theta in line:
+    #        a = np.cos(theta)
+    #        b = np.sin(theta)
+    #        x0 = a * rho
+    #        y0 = b * rho
+    #        x1 = int(x0 + 1000 * (-b))
+    #        y1 = int(y0 + 1000 * (a))
+    #        x2 = int(x0 - 1000 * (-b))
+    #        y2 = int(y0 - 1000 * (a))
+
+            #cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            #hough_lines.append(((x1, y1), (x2, y2)))
+
     cv2.imshow("Frame", edges)
                 
     if cv2.waitKey(1) & 0xFF == ord('q'):
