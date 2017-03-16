@@ -53,7 +53,14 @@ while True:
 
                 cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                 hough_lines.append(((x1, y1), (x2, y2)))
-
+    
+    if hough_lines:
+        random_sample = sample_lines(hough_lines, 100)
+        intersections = find_intersections(random_sample, img)
+        if intersections:
+            grid_size = min(img.shape[0], img.shape[1]) // 3
+            vanishing_point = find_vanishing_point(img, grid_size, intersections)
+    
     cv2.imshow("Frame", img)
                 
     if cv2.waitKey(1) & 0xFF == ord('q'):

@@ -117,7 +117,7 @@ def find_vanishing_point(img, grid_size, intersections):
                 max_intersections = current_intersections
                 best_cell = ((cell_left + cell_right) / 2, (cell_bottom + cell_top) / 2)
 
-    if not best_cell == [None, None]:
+    if best_cell != None and not best_cell == [None, None]:
         print("best_cell : " + str(best_cell[0]) + "," + str(best_cell[1]))
         rx1 = best_cell[0] - grid_size / 2
         ry1 = best_cell[1] - grid_size / 2
