@@ -98,6 +98,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:id="@+id/btnRecord"
+        android:onClick="micButtonClicked"
         android:background="@drawable/mic"
         android:layout_alignParentTop="true"
         android:layout_alignStart="@+id/btnDroneUp" />

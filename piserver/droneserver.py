@@ -39,7 +39,21 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 class IndexPageHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html")
- 
+    
+    def post(self):
+        commands = ['up', 'down', 'turn left', 'turn right', 'roll left',
+                    'roll right', 'arm', 'disarm', 'video', 'picture',
+                    'forward', 'reverse', 'return home']
+        data = json.loads(self.request.body)
+        print "Got JSON data:", data["ACTION"]
+        if data["ACTION"] not in commands:
+            reply = {"REPLY" : "Command not recognized"}
+        else:
+            reply = {"REPLY" : "Command recognized"}
+        reply = json.dumps(reply)
+        print reply
+        self.write(reply)
+        self.finish()
  
 class Application(tornado.web.Application):
     def __init__(self):
