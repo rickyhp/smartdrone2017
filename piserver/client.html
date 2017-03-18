@@ -1,25 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tornado WebSockets</title>
-    <script>
-        var ws;
- 
-        function onLoad() {
-            ws = new WebSocket("ws://localhost:8080/websocket");
- 
-            ws.onmessage = function(e) {
-               alert(e.data);
-            };
-        }
- 
-        function sendMsg() {
-            ws.send(document.getElementById('msg').value);
-        }
-    </script>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="style.css">
+    <title>Autonomous Drone IW 2017</title>
 </head>
-<body onload="onLoad();">
-    <strong>Message to Send:</strong>&nbsp;<input type="text" id="msg" maxlength="25" />
-    &nbsp;<input type="button" onclick="sendMsg();" value="Send" />
+<body onload="initDroneSocket()">
+    <p class="hints"></p>
+    <p class="response"></p>
+    <div>
+        <p class="output"><em>...diagnostic messages</em></p>
+    </div>
+    
+    <script src="dronewebspeech.js"></script>
 </body>
 </html>
