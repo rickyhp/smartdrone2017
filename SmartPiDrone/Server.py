@@ -21,10 +21,15 @@ from DroneData import *
 
 class Webserver:
 
+  
     #soc = socket.socket()         # Create a socket object
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host = socket.gethostname() # Get local machine name
     port = 8081              # Reserve a port for your service.
+
+    #client = None
+    #address = None
+     
   
     def __init__(self):
         self.soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR , 1)# For reusage of port
@@ -33,8 +38,41 @@ class Webserver:
 
     def waitForConnection(self):
         self.soc.listen(5)                 # Now wait for client connection (5 connections).
-        print "\r\n Server started and listening to port.... \r\n\n"
+        print "\r\n Server started and listening to port and waiting for client connection.... \r\n\n"
 
+
+    def WaitForConnectionEstablishment(self):
+        Connection = True
+        while  Connection:
+            self.waitForConnection()
+            client, address = self.soc.accept()
+            Connection = False          
+        print 'Got connection from client : ', address ,'\r\n\n' 
+
+
+    def ServeContinuously(self, dronedata,timestamp):
+        while True:
+                      
+            datetime = timestamp.getTimeStamp()
+            temperature = dronedata.getTemperature()
+            humidity = dronedata.getHumidity()
+            altitude = dronedata.getAltitude()
+            latitude = dronedata.getLatitude()
+            longitude = dronedata.getLongitude()
+
+            dicData = {"datetime": str(datetime) , "temperature":  str(temperature) ,
+                       "humidity": str(humidity),"altitude": str(altitude) , "latitude": str(latitude),"longitude":str(longitude)}
+
+            client, address = self.soc.accept()
+            client.sendall('Sending out drone data... \r\n\n')
+            client.sendall(json.dumps(dicData))# Send data  out in json format
+            print(json.dumps(dicData))
+
+            req = client.recv(1024)
+            #print req
+            client.close()  # Close the connection
+
+        
     def  serviceToClient(self, dronedata,timestamp):      
         while True:
             client, address = self.soc.accept()     # Establish connection with client.
@@ -56,20 +94,24 @@ class Webserver:
             #print (dicData['temperature'])
             #parsed_json = dicData
             #print (parsed_json["temperature"])
-
-            #json_string ='{"humidity": "23" , "altitude": "10"}'
+            
+            #json_string ={"humidity": "23" , "altitude": "10"}
             #parsed_json = json.loads(json_string)
             #print (parsed_json['humidity'])
 
+            #parsed_json = json.loads('[{"Front": 1, "Right": 4, "Rear": 2, "Left": 3}]')
+            #print (parsed_json)
             ########################
             #  Data read here!
             ########################
+
 
             client.sendall(json.dumps(dicData))# Send data  out in json format
             print(json.dumps(dicData))
 
             req = client.recv(1024)
             print req
+            
             match = re.match('GET /move\?a=(\d+)\sHTTP/1.1',req)
             #angle = match.group(1)
             #print "ANGLE: " + angle + "\n"
@@ -97,6 +139,7 @@ class Webserver:
 
     def closeConnection(self):
         print '\r\nSocket connection closed!\r\n\n'
+        client.close()
         self.soc.close
         self.soc.shutdown(socket.SHUT_RDWR)
         
