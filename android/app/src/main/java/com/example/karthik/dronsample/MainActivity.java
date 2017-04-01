@@ -40,7 +40,9 @@ public class MainActivity extends AppCompatActivity {
     Button leftButton;
     Button rightButton;
     Button captureButton;
-    String url;
+    Button sensorBtn;
+    ToggleButton takeOffToggleButton;
+    static String url;
     private static final int REQUEST_CODE = 1234;
 
     @Override
@@ -60,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
         leftButton = (Button) findViewById(R.id.btnLeft);
         rightButton = (Button) findViewById(R.id.btnRight);
         captureButton = (Button) findViewById(R.id.btnCapture);
+        takeOffToggleButton = (ToggleButton) findViewById(R.id.tbtnTakeOff);
+        sensorBtn = (Button) findViewById(R.id.sensor);
         // Disable button if no voice recognition service is present
         PackageManager pm = getPackageManager();
         List<ResolveInfo> activities = pm.queryIntentActivities(
@@ -69,15 +73,22 @@ public class MainActivity extends AppCompatActivity {
             micButton.setEnabled(false);
             micButton.setText("Recognizer not present");
         }
-        url = "http://192.168.43.53:8080/";
+
+        url = getIntent().getStringExtra("URL");
+        Log.v("url main recv", url);
+
         homeButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                String json, message;
-                json = "{\"ACTION\":\"return home\"}";
-                message = "Returning Home";
-                String[] myParams = {url, json, message};
-                new PostResponseToServer().execute(myParams);
+                Intent toMap = new Intent (getApplicationContext(), MapsActivity.class);
+                startActivity(toMap);
+            }
+        });
+        sensorBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent toSensor = new Intent (getApplicationContext(), SensorActivity.class);
+                startActivity(toSensor);
             }
         });
         armToggleButton.setOnClickListener(new View.OnClickListener(){
@@ -85,18 +96,33 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v){
                 String json, message;
                 if (armToggleButton.isChecked()) {
-                    json = "{\"ACTION\" : \"arm\"}";
+                    json = "{\"ACTION\" : \"arm\", \"MAP\":\"\"}";
                     message = "Drone Armed";
                 } else {
-                    json = "{\"ACTION\" : \"disarm\"}";
+                    json = "{\"ACTION\" : \"disarm\", \"MAP\":\"\"}";
                     message = "Drone Disarmed";
                 }
                 String[] myParams = {url, json, message};
                 new PostResponseToServer().execute(myParams);
             }
         });
+        takeOffToggleButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                String json, message;
+                if (takeOffToggleButton.isChecked()) {
+                    json = "{\"ACTION\" : \"autoTakeOff\", \"MAP\":\"\"}";
+                    message = "Auto Take off initiated";
+                } else {
+                    json = "{\"ACTION\" : \"autoLand\", \"MAP\":\"\"}";
+                    message = "Auto Landing initiated";
+                }
+                String[] myParams = {url, json, message};
+                new PostResponseToServer().execute(myParams);
+            }
+        });
         droneUpButton.setOnTouchListener(new View.OnTouchListener() {
-            String json = "{\"ACTION\" : \"up\"}";
+            String json = "{\"ACTION\" : \"up\", \"MAP\":\"\"}";
             String message = "Drone Move Up";
             String[] myParams = {url, json, message};
             @Override
@@ -106,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         droneDownButton.setOnTouchListener(new View.OnTouchListener() {
-            String json = "{\"ACTION\" : \"down\"}";
+            String json = "{\"ACTION\" : \"down\", \"MAP\":\"\"}";
             String message = "Drone Move Down";
             String[] myParams = {url, json, message};
             @Override
@@ -116,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         droneLeftButton.setOnTouchListener(new View.OnTouchListener() {
-            String json = "{\"ACTION\" : \"turn left\"}";
+            String json = "{\"ACTION\" : \"turn left\", \"MAP\":\"\"}";
             String message = "Drone Turn Left";
             String[] myParams = {url, json, message};
             @Override
@@ -126,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         droneRightButton.setOnTouchListener(new View.OnTouchListener() {
-            String json = "{\"ACTION\" : \"turn right\"}";
+            String json = "{\"ACTION\" : \"turn right\", \"MAP\":\"\"}";
             String message = "Drone Turn Right";
             String[] myParams = {url, json, message};
             @Override
@@ -136,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         forwardButton.setOnTouchListener(new View.OnTouchListener() {
-            String json = "{\"ACTION\" : \"forward\"}";
+            String json = "{\"ACTION\" : \"forward\", \"MAP\":\"\"}";
             String message = "Drone Move Forward";
             String[] myParams = {url, json, message};
             @Override
@@ -146,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         reverseButton.setOnTouchListener(new View.OnTouchListener() {
-            String json = "{\"ACTION\" : \"reverse\"}";
+            String json = "{\"ACTION\" : \"reverse\", \"MAP\":\"\"}";
             String message = "Drone Move Reverse";
             String[] myParams = {url, json, message};
             @Override
@@ -156,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         leftButton.setOnTouchListener(new View.OnTouchListener() {
-            String json = "{\"ACTION\" : \"roll left\"}";
+            String json = "{\"ACTION\" : \"roll left\", \"MAP\":\"\"}";
             String message = "Drone Roll Left";
             String[] myParams = {url, json, message};
             @Override
@@ -166,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         rightButton.setOnTouchListener(new View.OnTouchListener() {
-            String json = "{\"ACTION\" : \"roll right\"}";
+            String json = "{\"ACTION\" : \"roll right\", \"MAP\":\"\"}";
             String message = "Drone Roll Right";
             String[] myParams = {url, json, message};
             @Override
@@ -178,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
         videoRecButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                String json = "{\"ACTION\" : \"video\"}";
+                String json = "{\"ACTION\" : \"video\", \"MAP\":\"\"}";
                 String message = "Video Record";
                 String[] myParams = {url, json, message};
                 new PostResponseToServer().execute(myParams);
@@ -187,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         captureButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                String json = "{\"ACTION\" : \"picture\"}";
+                String json = "{\"ACTION\" : \"picture\", \"MAP\":\"\"}";
                 String message = "Image Captured";
                 String[] myParams = {url, json, message};
                 new PostResponseToServer().execute(myParams);
@@ -260,8 +286,8 @@ public class MainActivity extends AppCompatActivity {
         return null;
         }
     }
-    private class PostResponseToServer extends AsyncTask<String, Void, Void> {
-        protected Void doInBackground(String...params){
+    public class PostResponseToServer extends AsyncTask<String, Void, Boolean> {
+        protected Boolean doInBackground(String...params){
             final String url, json, message;
             url = params[0];
             json = params[1];

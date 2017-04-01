@@ -100,7 +100,7 @@
         android:id="@+id/btnRecord"
         android:onClick="micButtonClicked"
         android:background="@drawable/mic"
-        android:layout_alignParentTop="true"
+        android:layout_alignTop="@+id/tbtnTakeOff"
         android:layout_alignStart="@+id/btnDroneUp" />
 
     <Button
@@ -118,5 +118,24 @@
         android:background="@drawable/videorec"
         android:layout_alignParentBottom="true"
         android:layout_alignStart="@+id/btnDown" />
+
+    <ToggleButton
+        android:id="@+id/tbtnTakeOff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/btnReturn"
+        android:layout_alignStart="@+id/tbtnArm"
+        android:textOff="TakeOff"
+        android:textOn="Land" />
+
+    <Button
+        android:id="@+id/sensor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/btnReturn"
+        android:layout_alignTop="@+id/btnRecord"
+        android:layout_marginStart="30dp"
+        android:layout_toEndOf="@+id/btnRecord"
+        android:text="Sensor" />
 
 </RelativeLayout>
