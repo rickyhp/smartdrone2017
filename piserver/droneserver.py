@@ -15,6 +15,7 @@ import tornado.web
 import tornado.websocket
 import tornado.httpserver
 import tornado.ioloop
+import json
  
  
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -52,13 +53,20 @@ class IndexPageHandler(tornado.web.RequestHandler):
         self.render("index.html")
     
     def post(self):
+        data = {"ACTION": ""}
         commands = ['up', 'down', 'turn left', 'turn right', 'roll left',
                     'roll right', 'arm', 'disarm', 'video', 'picture',
-                    'forward', 'reverse', 'return home']
-        data = json.loads(self.request.body)
-        print "Got JSON data:", data["ACTION"]
-        if data["ACTION"] not in commands:
-            reply = {"REPLY" : "Command not recognized"}
+                    'forward', 'reverse', 'return home', 'connect',
+                    'autoTakeOff', 'autoLand']
+        if self.request.body:
+            print "Got JSON data:", self.request.body
+            data = json.loads(self.request.body)
+            reply = {"REPLY": "Received"}
+        if data["ACTION"] == "sensor":
+            reply = {"SENSOR":"132.0"}
+        elif data["ACTION"] == "map":
+            print data["MAP"]
+            reply = {"REPLY": "Coordinates sent"}
         else:
             reply = {"REPLY" : "Command recognized"}
         reply = json.dumps(reply)
