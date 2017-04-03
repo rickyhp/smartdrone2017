@@ -3,7 +3,7 @@
 #   Author      : NayLA  
 #   Date         : 15/03/2017
 #####################################
-
+import sys
 import socket               # Import socket module
 import json
 from TimeStampLib import *
@@ -16,12 +16,13 @@ from flask import Flask , render_template
 import cgi
 import cgitb
 from DroneData import *
+from CmdExecutor import *
 
 
 
 class Webserver:
 
-  
+    
     #soc = socket.socket()         # Create a socket object
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host = socket.gethostname() # Get local machine name
@@ -34,7 +35,8 @@ class Webserver:
     def __init__(self):
         self.soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR , 1)# For reusage of port
         #self.soc.bind((self.host, self.port))           # Bind to localhost and port
-        self.soc.bind(('169.254.138.189',self.port))# Bind to IP & port
+        #self.soc.bind(('169.254.138.189',self.port))# Bind to IP & port , (eth0)
+        self.soc.bind(('192.168.0.147',self.port))# Bind to IP & port , (wlan0)
 
     def waitForConnection(self):
         self.soc.listen(5)                 # Now wait for client connection (5 connections).
@@ -50,9 +52,9 @@ class Webserver:
         print 'Got connection from client : ', address ,'\r\n\n' 
 
 
-    def ServeContinuously(self, dronedata,timestamp):
+    def ServeContinuously(self, dronedata,timestamp,commandexecutor):
         while True:
-                      
+          
             datetime = timestamp.getTimeStamp()
             temperature = dronedata.getTemperature()
             humidity = dronedata.getHumidity()
@@ -69,7 +71,34 @@ class Webserver:
             print(json.dumps(dicData))
 
             req = client.recv(1024)
-            #print req
+            print req
+
+            location = {}
+
+            # Split header and payload body
+            body = req.split('\r\n\r\n',1)[1]
+
+            #Convert body into json object 
+            parsed_json = json.loads(body)
+
+            print "Size of received Jason array : ", len(parsed_json),"\r\n"
+
+            #Set received  command and way point locations
+            if len(parsed_json) ==1:
+                commandexecutor.cmd = parsed_json["ACTION"] 
+                print "Parsed JSON CMD : ",commandexecutor.cmd
+                            
+            elif len(parsed_json) ==2:
+                commandexecutor.cmd = parsed_json["ACTION"]
+                commandexecutor.locMap = parsed_json["MAP"]
+                for item in range(len(commandexecutor.locMap)):
+                    location[item] = commandexecutor.locMap[item]
+                    print "latitude and longitude : ", location[item]          
+                
+            #data = []
+            #data = client.recv(1024)
+            #json.dumps(data)
+            
             client.close()  # Close the connection
 
         
@@ -111,6 +140,11 @@ class Webserver:
 
             req = client.recv(1024)
             print req
+
+            body = req.split('\r\n\r\n',1)[1]
+            parsed_json = json.loads(body)
+            print "Size of received Jason  array : ", len(parsed_json)
+            print "Parsed JSON : " ,parsed_json["ACTION"]
             
             match = re.match('GET /move\?a=(\d+)\sHTTP/1.1',req)
             #angle = match.group(1)

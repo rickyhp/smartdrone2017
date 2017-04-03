@@ -12,8 +12,8 @@ import json
 
 class CmdReceiver:
 
-    #cmd = None
-    cmd = 3#hard-coded temporarily for testing
+    cmd = ''
+    #cmd = 3#hard-coded temporarily for testing
 
     options = {
                 "doNothing" : 0,
@@ -26,7 +26,8 @@ class CmdReceiver:
                 "goRight":7,
                 "goUp":8,
                 "goDown":9,
-                "goWayPoint":10
+                "goWayPoint":10,
+                "connect":11
             }
 
     def __init__(self):
@@ -40,7 +41,10 @@ class CmdReceiver:
     def parsedJSON(self,json_string):
         parsed_json = json.loads(json_string)
         return self.options.get(parsed_json['doNothing'],0)
-        
+
+
+    def setCmd(self,cmd):
+        self.cmd = cmd
 
     def getCmd(self):
         print "Received command : %s"%self.cmd

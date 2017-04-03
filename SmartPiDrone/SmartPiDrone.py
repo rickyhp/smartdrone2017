@@ -21,7 +21,7 @@ from UltrasonicSensor import *
 import Adafruit_DHT
 from Server import *
 from DroneData import *
-from CmdReceiver import *
+#from CmdReceiver import *
 from CmdExecutor import *
 
 
@@ -31,6 +31,8 @@ global cycle
 
 MAV_MODE_AUTO   = 4
 home_position_set = False
+
+appcmd = 'doNothing'
 
         
 ################################################
@@ -46,9 +48,10 @@ def main():
     webserver = Webserver()
     timestamp = TimeStamp()
     dronedata = DroneData()
-    commandReceiver = CmdReceiver()
+    #commandReceiver = CmdReceiver()
     commandexecutor = CmdExecutor()
 
+    
 
 ##    # Connect to the Vehicle
 ##    print "Connecting..."
@@ -67,9 +70,12 @@ def main():
     webserver.WaitForConnectionEstablishment()
 
     #For testing purpose
-    commandexecutor .executeCmd(1)
-    commandexecutor .executeCmd(2)
-    commandexecutor .executeCmd(3)
+    
+    #commandexecutor .executeCmd()
+    #commandexecutor.cmd = 11
+    #commandexecutor .executeCmd(1)
+    #commandexecutor .executeCmd(2)
+    #commandexecutor .executeCmd(3)
 
     #************************************************************************#
 
@@ -77,20 +83,18 @@ def main():
 
         try:
 
-            thread.start_new_thread(ReceiveControlCmdThread, (commandReceiver,))
-            thread.start_new_thread(performOperation, (commandexecutor , commandReceiver.getCmd(), ))
+            thread.start_new_thread(SocketServeContinuousThread, (webserver, dronedata, timestamp ,commandexecutor, 2, ))
+            thread.start_new_thread(performOperationThread, (commandexecutor, )) 
 
             thread.start_new_thread(HumidityAM2302Thread, (HudTempSensor, )) 
             thread.start_new_thread(Sonar1Thread, (sonar1, ))
             thread.start_new_thread(Sonar2Thread, (sonar2, ))
             thread.start_new_thread(Sonar3Thread, (sonar3, ))
             thread.start_new_thread(Sonar4Thread, (sonar4, ))
-            #thread.start_new_thread(GetAllSensorDataThread, (sonar1,sonar2,sonar3,sonar4,HudTempSensor, ))
-            
-            thread.start_new_thread(SocketServeContinuousThread, (webserver, dronedata, timestamp ,2, ))
+            #thread.start_new_thread(GetAllSensorDataThread, (sonar1,sonar2,sonar3,sonar4,HudTempSensor, ))       
             #thread.start_new_thread(SocketServerThread, (webserver, dronedata, timestamp ,5, ))
             #thread.start_new_thread(MavLinkSerialCommThread, (mavlinkdata, ))
-                        
+               
                         
         except:
             print "Error: unable to start thread"

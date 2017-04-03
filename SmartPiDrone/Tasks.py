@@ -13,6 +13,8 @@ from UltrasonicSensor import *
 import Adafruit_DHT
 from Server import *
 from DroneData import *
+from CmdReceiver import *
+from CmdExecutor import *
 
 
 def DummyThread(param):
@@ -28,15 +30,17 @@ def MavLinkSerialCommThread(commdata):
 
 def ReceiveControlCmdThread(cmdreceiver):
     while 1:
-        print("Receiving Control command from App....\r\n")
+        print("Receiving Control command from App....\r\n")     
         cmdreceiver.getCmd()
-        time.sleep(2)
+        time.sleep(0.5)
 
-def performOperation(cmdexecutor,cmd):
+def performOperationThread(commandexecutor):
     while 1:
         print("Executing command on drone....\r\n")
-        cmdexecutor.executeCmd(cmd)
-        time.sleep(2)
+        print "Command : " , commandexecutor.cmd
+        commandexecutor.executeCmd()
+        commandexecutor.cmd = 'doNothing'#Reset to default
+        time.sleep(0.2)
 
 
 def Sonar1Thread(sonar_object):
@@ -98,9 +102,9 @@ def GetAllSensorDataThread(s1,s2,s3,s4,DHT_AM2302):
         time.sleep(0.2)
 
 
-def SocketServeContinuousThread(server, dicData, timestamp ,delay):
+def SocketServeContinuousThread(server, dicData, timestamp ,commandexecutor,delay):
      while 1:
-        server.ServeContinuously(dicData ,timestamp)
+        server.ServeContinuously(dicData ,timestamp,commandexecutor)
         time.sleep(delay)
          
 
