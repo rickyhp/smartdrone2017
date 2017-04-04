@@ -18,6 +18,8 @@ class CmdExecutor:
     locMap = []
     #Empty dictionary
     options = {}
+    #Global variables
+    vehicle = None
     
     def __init__(self):
         print "Command Executor object initialized!\r\n\n"
@@ -44,9 +46,14 @@ class CmdExecutor:
     def goWayPoint():
         print "WayPoint \r\n\n"
 
-    def connect():
+    def connect(self, connstring):
         print "Connecting to Drone.... \r\n\n"
-
+        self.vehicle = connect(connstring, wait_ready=True)
+        
+    def disconnect(self):
+        print "Disconnecting from Drone.... \r\n\n"
+        self.vehicle.close()
+        
     def arm():
         print "Arming motor.... \r\n\n"
 
@@ -126,3 +133,7 @@ class CmdExecutor:
     def executeCmd(self):
         return self.options.get(self.cmd,0)()
     
+# test cases
+testCmd = CmdExecutor()
+testCmd.connect('udp:127.0.0.1:14549') #connect to sitl
+testCmd.disconnect() #disconnect
