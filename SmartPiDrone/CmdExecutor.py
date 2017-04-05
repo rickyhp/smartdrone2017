@@ -109,19 +109,20 @@ class CmdExecutor:
 testCmd = CmdExecutor()
 testCmd.connect('udp:127.0.0.1:14549') # connect to sitl
 testCmd.arm() # arm
-testCmd.takeoff(10) # takeoff 10 meters
+testCmd.takeoff(5) # takeoff 10 meters
 time.sleep(3)
 #testCmd.land() # land
 #testCmd.send_ned_velocity(-5,0,0,5)
-testCmd.forward()
-testCmd.left()
-testCmd.right()
-testCmd.reverse()
+#testCmd.forward()
+#testCmd.left()
+#testCmd.right()
+#testCmd.reverse()
+#testCmd.up()
+#testCmd.down()
+#testCmd.rotateLeft(45)
+testCmd.rotateRight(45)
+#testCmd.reverse()
 testCmd.up()
-testCmd.down()
-#testCmd.rotateLeft(30)
-
-#testCmd.rotateRight()
-time.sleep(10) # hovering at the location for 30 secs before RTL (program exit)
+#time.sleep(10) # hovering at the location for 30 secs before RTL (program exit)
 #testCmd.disarm() # disarm
 testCmd.disconnect() # disconnect

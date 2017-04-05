@@ -38,6 +38,7 @@ class PixhawkCmd:
         
     def arm(self):
         self.vehicle.mode = VehicleMode("GUIDED")
+        time.sleep(2)
         print "Basic pre-arm checks"
         # Don't let the user try to fly autopilot is booting
         if self.vehicle.mode.name == "INITIALISING":
@@ -92,7 +93,10 @@ class PixhawkCmd:
             print "Motors Disarmed \r\n\n"
         else:
             print "Motors not armed"
-            
+    
+    # Note for vx:
+    # vx > 0 => fly North
+    # vx < 0 => fly South      
     def forward(self):
         print "Going forward.... \r\n\n"
         self.send_ned_velocity(self.velocity,0,0,self.velocity_duration) # vx=5, duration=1 sec
@@ -101,6 +105,9 @@ class PixhawkCmd:
         print "Going reverse.... \r\n\n"
         self.send_ned_velocity(0-(self.velocity),0,0,self.velocity_duration) # vx=-5, duration=1 sec
 
+    # Note for vy:
+    # vy > 0 => fly East
+    # vy < 0 => fly West
     def left(self):
         print "Going left.... \r\n\n"
         self.send_ned_velocity(0,0-(self.velocity),0,self.velocity_duration) # vy=-5, duration=1 sec
@@ -109,21 +116,24 @@ class PixhawkCmd:
         print "Going right.... \r\n\n"
         self.send_ned_velocity(0,self.velocity,0,self.velocity_duration) # vy=5, duration=1 sec
 
+    # Note for vz: 
+    # vz < 0 => ascend
+    # vz > 0 => descend
     def up(self):
         print "Going up.... \r\n\n"
-        self.send_ned_velocity(0,0,self.velocity,self.velocity_duration) # vz=5, duration=1 sec
+        self.send_ned_velocity(0,0,0-(self.velocity),self.velocity_duration) # vz=5, duration=1 sec
         
     def down(self):
         print "Going down.... \r\n\n"
-        self.send_ned_velocity(0,0,0-(self.velocity),self.velocity_duration) # vz=-5, duration=1 sec
+        self.send_ned_velocity(0,0,self.velocity,self.velocity_duration) # vz=-5, duration=1 sec
 
     def rotateLeft(self, yaw_degree):
         print "Rotate left.... \r\n\n"
-        self.condition_yaw(yaw_degree,relative=False,rotation=-1) # rotate 30 deg left relative to current heading
+        self.condition_yaw(yaw_degree,relative=True,direction=-1) # rotate 30 deg left relative to current heading
 
     def rotateRight(self, yaw_degree):
         print "Rotate right.... \r\n\n"
-        self.condition_yaw(yaw_degree,relative=False,rotation=1) # rotate 30 deg right relative to current heading
+        self.condition_yaw(yaw_degree,relative=True,direction=1) # rotate 30 deg right relative to current heading
 
     def send_ned_velocity(self,velocity_x, velocity_y, velocity_z, duration):
         """
@@ -144,11 +154,19 @@ class PixhawkCmd:
             self.vehicle.send_mavlink(msg)
             time.sleep(1)
         
-    def condition_yaw(self, heading, relative=False, rotation=1):
+    def condition_yaw(self, heading, relative=False, direction=1):
         """
         Send MAV_CMD_CONDITION_YAW message to point vehicle at a specified heading (in degrees).
+
         This method sets an absolute heading by default, but you can set the `relative` parameter
         to `True` to set yaw relative to the current yaw heading.
+
+        By default the yaw of the vehicle will follow the direction of travel. After setting 
+        the yaw using this function there is no way to return to the default yaw "follow direction 
+        of travel" behaviour (https://github.com/diydrones/ardupilot/issues/2427)
+
+        For more information see: 
+        http://copter.ardupilot.com/wiki/common-mavlink-mission-command-messages-mav_cmd/#mav_cmd_condition_yaw
         """
         if relative:
             is_relative = 1 #yaw relative to direction of travel
@@ -161,7 +179,7 @@ class PixhawkCmd:
             0, #confirmation
             heading,    # param 1, yaw in degrees
             0,          # param 2, yaw speed deg/s
-            rotation,          # param 3, direction -1 ccw, 1 cw
+            direction,          # param 3, direction -1 ccw, 1 cw
             is_relative, # param 4, relative offset 1, absolute angle 0
             0, 0, 0)    # param 5 ~ 7 not used
         # send command to vehicle
