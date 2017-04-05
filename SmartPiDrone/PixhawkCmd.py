@@ -6,19 +6,11 @@
 #   Description :   This class contains useful pixhawk/mavlink high level commands
 #####################################
 
-import sys
 import time
 from dronekit import connect , Command , LocationGlobal , VehicleMode
 from pymavlink import mavutil
-import argparse , math
-
 
 class PixhawkCmd:
-
-    cmd = 'doNothing'#Set as default
-    locMap = []
-    #Empty dictionary
-    options = {}
     #Global variables
     vehicle = None
     velocity = 2
@@ -133,38 +125,6 @@ class PixhawkCmd:
         print "Rotate right.... \r\n\n"
         self.condition_yaw(yaw_degree,relative=False,rotation=1) # rotate 30 deg right relative to current heading
 
-    #Store function references in dictionary
-    options = {
-                'doNothing':doNothing,             
-                'getLocation':getLocation,
-                'goWayPoint':goWayPoint,
-                'connect':connect,
-                'arm':arm,
-                'disarm':disarm,
-                'takeoff':takeoff,
-                'land':land,
-                'forward':forward,
-                'reverse':reverse,
-                'left':left,
-                'right':right,
-                'up':up,
-                'down':down,
-                'rotateLeft':rotateLeft,
-                'rotateRight':rotateRight               
-            }
-
-
-    def setCmd(self,cmd):
-        self.cmd = cmd
-
-    def getCmd(self):
-        #return self.options.get(self.cmd,0)()
-        return self.options[self.cmd]()
-
-
-    def executeCmd(self):
-        return self.options.get(self.cmd,0)()
-    
     def send_ned_velocity(self,velocity_x, velocity_y, velocity_z, duration):
         """
         Move vehicle in direction based on specified velocity vectors.
@@ -206,23 +166,3 @@ class PixhawkCmd:
             0, 0, 0)    # param 5 ~ 7 not used
         # send command to vehicle
         self.vehicle.send_mavlink(msg)
-    
-# test cases
-#testCmd = PixhawkCmd()
-#testCmd.connect('udp:127.0.0.1:14549') # connect to sitl
-#testCmd.arm() # arm
-#testCmd.takeoff(10) # takeoff 10 meters
-#testCmd.land() # land
-#testCmd.send_ned_velocity(-5,0,0,5)
-#testCmd.forward()
-#testCmd.left()
-#testCmd.right()
-#testCmd.reverse()
-#testCmd.up()
-#testCmd.down()
-#testCmd.rotateLeft(30)
-#time.sleep(3)
-#testCmd.rotateRight()
-#time.sleep(30) # hovering at the location for 30 secs before RTL (program exit)
-#testCmd.disarm() # disarm
-#testCmd.disconnect() # disconnect
