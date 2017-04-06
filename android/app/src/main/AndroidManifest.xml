@@ -21,7 +21,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".ConnectActivity" android:screenOrientation="portrait">
+        <activity android:name=".ConnectActivity" android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -39,7 +39,7 @@
                 android:value="com.example.karthik.dronsample.MainActivity">
             </meta-data>
         </activity>
-        <activity android:name=".SensorActivity" android:screenOrientation="landscape"
+        <activity android:name=".TiltActivity" android:screenOrientation="landscape"
             android:parentActivityName=".MainActivity">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.karthik.dronsample.MainActivity">

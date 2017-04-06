@@ -16,7 +16,8 @@ import tornado.websocket
 import tornado.httpserver
 import tornado.ioloop
 import json
- 
+import ast
+import random
  
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
@@ -49,6 +50,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
  
  
 class IndexPageHandler(tornado.web.RequestHandler):
+
     def get(self):
         self.render("index.html")
     
@@ -57,18 +59,25 @@ class IndexPageHandler(tornado.web.RequestHandler):
         commands = ['up', 'down', 'turn left', 'turn right', 'roll left',
                     'roll right', 'arm', 'disarm', 'video', 'picture',
                     'forward', 'reverse', 'return home', 'connect',
-                    'autoTakeOff', 'autoLand']
+                    'autoTakeOff', 'autoLand', 'drone position']
         if self.request.body:
             print "Got JSON data:", self.request.body
             data = json.loads(self.request.body)
-            reply = {"REPLY": "Received"}
         if data["ACTION"] == "sensor":
             reply = {"SENSOR":"132.0"}
         elif data["ACTION"] == "map":
-            print data["MAP"]
+            count = 1
+            for latLng in ast.literal_eval(data["MAP"]):
+                lat, lng = ast.literal_eval(latLng)
+                print count, lat,  lng
+                print type(lat), type(lng)
+                count += 1
             reply = {"REPLY": "Coordinates sent"}
+        elif data["ACTION"] == "drone position":
+            latLngList = ["1.2897150957619739,103.77706065773963", "1.289584036003337,103.77684272825718"]
+            reply = {"POSITION" : random.choice(latLngList)}
         else:
-            reply = {"REPLY" : "Command recognized"}
+            reply = {"REPLY" : "Command received"}
         reply = json.dumps(reply)
         print reply
         self.write(reply)
