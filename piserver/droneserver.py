@@ -56,24 +56,22 @@ class IndexPageHandler(tornado.web.RequestHandler):
     
     def post(self):
         data = {"ACTION": ""}
-        commands = ['up', 'down', 'turn left', 'turn right', 'roll left',
-                    'roll right', 'arm', 'disarm', 'video', 'picture',
-                    'forward', 'reverse', 'return home', 'connect',
-                    'autoTakeOff', 'autoLand', 'drone position']
+        commands = ['up', 'down', 'left', 'right', 'arm', 'disarm', 'video', 'picture',
+                    'forward', 'reverse', 'connect', 'autoTakeoff', 'autoLand',
+                    'goWayPoint', 'getLocation', 'sensor']
         if self.request.body:
             print "Got JSON data:", self.request.body
             data = json.loads(self.request.body)
         if data["ACTION"] == "sensor":
             reply = {"SENSOR":"132.0"}
-        elif data["ACTION"] == "map":
-            count = 1
-            for latLng in ast.literal_eval(data["MAP"]):
-                lat, lng = ast.literal_eval(latLng)
-                print count, lat,  lng
-                print type(lat), type(lng)
-                count += 1
+        elif data["ACTION"] == "goWayPoint":
+            altList = ast.literal_eval(data["ALTITUDE"])
+            mapList = ast.literal_eval(data["MAP"])
+            for i in range(len(mapList)):
+                lat, lng = ast.literal_eval(mapList[i])
+                print ++i, lat,  lng, altList[i], data["DRONEALTITUDE"]
             reply = {"REPLY": "Coordinates sent"}
-        elif data["ACTION"] == "drone position":
+        elif data["ACTION"] == "getLocation":
             latLngList = ["1.2897150957619739,103.77706065773963", "1.289584036003337,103.77684272825718"]
             reply = {"POSITION" : random.choice(latLngList)}
         else:

@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v){
                     if (takeOffToggleButton.isChecked()) {
-                        json = ConnectActivity.getJSONObject("ACTION", "autoTakeOff");
+                        json = ConnectActivity.getJSONObject("ACTION", "autoTakeoff");
                         message = "Auto Take Off initiated";
                     } else {
                         json = ConnectActivity.getJSONObject("ACTION", "autoLand");
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         leftButton.setOnTouchListener(new View.OnTouchListener() {
-            JSONObject json = ConnectActivity.getJSONObject("ACTION", "roll left");
+            JSONObject json = ConnectActivity.getJSONObject("ACTION", "left");
             String message = "Drone Roll Left";
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         rightButton.setOnTouchListener(new View.OnTouchListener() {
-            JSONObject json = ConnectActivity.getJSONObject("ACTION", "roll right");
+            JSONObject json = ConnectActivity.getJSONObject("ACTION", "right");
             String message = "Drone Roll Right";
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         videoRecButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                JSONObject json = ConnectActivity.getJSONObject("ACTION", "Video");
+                JSONObject json = ConnectActivity.getJSONObject("ACTION", "video");
                 String message = "Video Record";
                 POST(json.toString(), message);
             }
@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
         captureButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                JSONObject json = ConnectActivity.getJSONObject("ACTION", "capture");
+                JSONObject json = ConnectActivity.getJSONObject("ACTION", "picture");
                 String message = "Image Captured";
                 POST(json.toString(), message);
             }

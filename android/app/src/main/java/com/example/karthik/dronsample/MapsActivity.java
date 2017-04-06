@@ -1,6 +1,7 @@
 package com.example.karthik.dronsample;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -12,7 +13,9 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -33,7 +36,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -72,15 +74,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                JSONObject json = ConnectActivity.getJSONObject("ACTION", "map");
-                try {
-                    json.put("MAP", getLatLongJSONArray());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                Log.v("COORDINATES", json.toString());
-                String message = "Coordinates sent";
-                POST(json.toString(), message);
+                final Dialog dialog = new Dialog(MapsActivity.this);
+                dialog.setContentView(R.layout.altitude_coordinates_popup);
+                final EditText droneAlt = (EditText) dialog.findViewById(R.id.droneAlt);
+                Button dialogButton = (Button) dialog.findViewById(R.id.btn_ok);
+                dialogButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        JSONObject json = ConnectActivity.getJSONObject("ACTION", "goWayPoint");
+                        try {
+                            json.put("MAP", getLatLongJSONArray());
+                            json.put("ALTITUDE", getAltitudeJSONArray());
+                            json.put("DRONEALTITUDE", droneAlt.getText().toString());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        Log.v("COORDINATES", json.toString());
+                        String message = "Coordinates sent";
+                        POST(json.toString(), message);
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
             }
         });
     }
@@ -90,7 +105,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void run() {
                 String response;
-                JSONObject json = ConnectActivity.getJSONObject("ACTION", "drone position");
+                JSONObject json = ConnectActivity.getJSONObject("ACTION", "getLocation");
                 response = POST(json.toString(), null);
                 JSONObject jsonResponse;
                 try {
@@ -306,6 +321,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     String.valueOf(latLong.longitude) + ")");
             }
         return latLongArray.toString();
+    }
+
+    private String getAltitudeJSONArray() throws Exception {
+        JSONArray altitudeArray = new JSONArray();
+        for (LatLng latLong : markerPoints){
+            String altitudeUrl = "https://maps.googleapis.com/maps/api/elevation/json?locations=" +
+                    String.valueOf(latLong.latitude) + "," + String.valueOf(latLong.longitude) +
+                    "&key=AIzaSyAhqtoCwD_0ZBiB7caWjQe2tX1XML-TNTo&sensor=true";
+            String[] myParams = {altitudeUrl};
+            String response = new GetResponseFromServer().execute(myParams).get();
+            JSONObject jsonResponse = new JSONObject(response);
+            JSONArray resp = jsonResponse.getJSONArray("results");
+            JSONObject results = resp.getJSONObject(0);
+            String altitude = results.getString("elevation");
+            altitudeArray.put(altitude);
+        }
+        return altitudeArray.toString();
     }
 
     @Override
