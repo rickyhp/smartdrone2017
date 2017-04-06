@@ -1,5 +1,5 @@
 #####################################
-#   File Name : PiDrone.py   
+#   File Name : SmartPiDrone.py   
 #   Author      : NayLA  
 #   Date         : 11/03/2017
 #####################################
@@ -21,7 +21,6 @@ from UltrasonicSensor import *
 import Adafruit_DHT
 from Server import *
 from DroneData import *
-#from CmdReceiver import *
 from CmdExecutor import *
 
 
@@ -48,11 +47,9 @@ def main():
     webserver = Webserver()
     timestamp = TimeStamp()
     dronedata = DroneData()
-    #commandReceiver = CmdReceiver()
     commandexecutor = CmdExecutor()
 
     
-
 ##    # Connect to the Vehicle
 ##    print "Connecting..."
 ##
@@ -70,13 +67,9 @@ def main():
     webserver.WaitForConnectionEstablishment()
 
     #For testing purpose
-    
-    #commandexecutor .executeCmd()
     #commandexecutor.cmd = 11
-    #commandexecutor .executeCmd(1)
-    #commandexecutor .executeCmd(2)
-    #commandexecutor .executeCmd(3)
-
+    #commandexecutor .executeCmd()
+    
     #************************************************************************#
 
     try:

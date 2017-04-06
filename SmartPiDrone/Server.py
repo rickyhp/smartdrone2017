@@ -94,10 +94,24 @@ class Webserver:
                 for item in range(len(commandexecutor.locMap)):
                     location[item] = commandexecutor.locMap[item]
                     print "latitude and longitude : ", location[item]          
+
+            #Send drone data out when 'getLocation' command is received
+            if commandexecutor.cmd =='getLoction':
                 
-            #data = []
-            #data = client.recv(1024)
-            #json.dumps(data)
+                datetime = timestamp.getTimeStamp()
+                temperature = dronedata.getTemperature()
+                humidity = dronedata.getHumidity()
+                altitude = dronedata.getAltitude()
+                latitude = dronedata.getLatitude()
+                longitude = dronedata.getLongitude()
+                
+                dicData = {"datetime": str(datetime) , "temperature":  str(temperature) ,
+                           "humidity": str(humidity),"altitude": str(altitude) , "latitude": str(latitude),"longitude":str(longitude)}
+
+                print "Sending location data....\r\n"
+                client.sendall(json.dumps(dicData))# Send data  out in json format
+                print(json.dumps(dicData))
+                
             
             client.close()  # Close the connection
 

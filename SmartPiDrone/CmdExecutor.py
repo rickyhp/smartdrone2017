@@ -1,5 +1,5 @@
 #####################################
-#   File Name : PiDrone.py   
+#   File Name : CmdExecutor.py   
 #   Author      : NayLA  
 #   Date         : 29/03/2017
 #####################################
@@ -74,6 +74,33 @@ class CmdExecutor:
     def rotateRight(self, yaw_degree):
         self.pixhawkCmd.rotateRight(yaw_degree)
 
+	def rollLeft():
+         print "Roll left.... \r\n\n"
+
+        
+    def rollRight():
+        print "Roll right.... \r\n\n"
+        
+        
+    def autoTakeoff():
+        print "Auto takeoff.... \r\n\n"
+
+        
+    def autoLand():
+        print "Auto landing.... \r\n\n"
+
+        
+    def returnHome():
+        print "Returning home location.... \r\n\n"
+
+        
+    def video():
+        print "Taking video.... \r\n\n"
+
+        
+    def picture():
+        print "Taking picture.... \r\n\n"
+
     #Store function references in dictionary
     options = {
                 'doNothing':doNothing,             
@@ -91,7 +118,14 @@ class CmdExecutor:
                 'up':up,
                 'down':down,
                 'rotateLeft':rotateLeft,
-                'rotateRight':rotateRight               
+                'rotateRight':rotateRight,
+                'rollLeft':rollLeft,
+                'rollRight':rollRight,
+                'autoTakeOff':autoTakeoff,
+                'autoLand':autoLand,
+                'returnHome':returnHome,
+                'video':video,
+                'picture':picture
             }
 
 
