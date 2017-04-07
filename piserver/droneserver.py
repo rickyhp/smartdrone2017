@@ -18,6 +18,8 @@ import tornado.ioloop
 import json
 import ast
 import random
+
+from new_mission import createFile as createMissionFile
  
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
@@ -65,11 +67,12 @@ class IndexPageHandler(tornado.web.RequestHandler):
         if data["ACTION"] == "sensor":
             reply = {"SENSOR":"132.0"}
         elif data["ACTION"] == "goWayPoint":
-            altList = ast.literal_eval(data["ALTITUDE"])
-            mapList = ast.literal_eval(data["MAP"])
+            altList = ast.literal_eval(data["MARKER_ALT"])
+            mapList = ast.literal_eval(data["MARKERS"])
+            createMissionFile(mapList, int(round(float(data["RELATIVE_ALT"]))), int(round(float(data["ABSOLUTE_ALT"]))))
             for i in range(len(mapList)):
                 lat, lng = ast.literal_eval(mapList[i])
-                print ++i, lat,  lng, altList[i], data["DRONEALTITUDE"]
+                print ++i, lat,  lng, int(round(float(altList[i]))), int(round(float(data["RELATIVE_ALT"]))), int(round(float(data["ABSOLUTE_ALT"])))
             reply = {"REPLY": "Coordinates sent"}
         elif data["ACTION"] == "getLocation":
             latLngList = ["1.2897150957619739,103.77706065773963", "1.289584036003337,103.77684272825718"]

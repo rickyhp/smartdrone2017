@@ -11,9 +11,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -69,68 +68,88 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         markDronePosition();
         submitBtn = (Button) findViewById(R.id.btn_map);
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Dialog dialog = new Dialog(MapsActivity.this);
-                dialog.setContentView(R.layout.altitude_coordinates_popup);
-                final EditText droneAlt = (EditText) dialog.findViewById(R.id.droneAlt);
-                Button dialogButton = (Button) dialog.findViewById(R.id.btn_ok);
-                dialogButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        JSONObject json = ConnectActivity.getJSONObject("ACTION", "goWayPoint");
-                        try {
-                            json.put("MAP", getLatLongJSONArray());
-                            json.put("ALTITUDE", getAltitudeJSONArray());
-                            json.put("DRONEALTITUDE", droneAlt.getText().toString());
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                if (markerPoints != null) {
+                    final Dialog dialog = new Dialog(MapsActivity.this);
+                    dialog.setContentView(R.layout.altitude_coordinates_popup);
+                    final EditText droneAlt = (EditText) dialog.findViewById(R.id.droneAlt);
+                    Button dialogButton = (Button) dialog.findViewById(R.id.btn_ok);
+                    dialogButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            LatLng location = null;
+                            try {
+                                location = stringToLatLong(getDroneLocation());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            JSONObject json = ConnectActivity.getJSONObject("ACTION", "goWayPoint");
+                            try {
+                                json.put("MARKERS", getLatLongJSONArray());
+                                json.put("MARKER_ALT", getAltitudeJSONArray());
+                                json.put("RELATIVE_ALT", droneAlt.getText().toString());
+                                json.put("ABSOLUTE_ALT", getAltitude(location));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            String message = "Coordinates sent";
+                            POST(json.toString(), message);
+                            dialog.dismiss();
                         }
-                        Log.v("COORDINATES", json.toString());
-                        String message = "Coordinates sent";
-                        POST(json.toString(), message);
-                        dialog.dismiss();
-                    }
-                });
-                dialog.show();
+                    });
+                    dialog.show();
+                } else {
+                    Toast.makeText(MapsActivity.this, "Atleast one location needed",
+                            Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
-    private void markDronePosition(){
-        scheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                String response;
-                JSONObject json = ConnectActivity.getJSONObject("ACTION", "getLocation");
-                response = POST(json.toString(), null);
-                JSONObject jsonResponse;
-                try {
-                    jsonResponse = new JSONObject(response);
-                    Log.v("JSONResponse", jsonResponse.get("POSITION").toString());
-                    LatLng location = stringToLatLong(jsonResponse.get("POSITION").toString());
+    private void markDronePosition() {
+        try {
+            scheduler.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    LatLng location = null;
+                    try {
+                        location = stringToLatLong(getDroneLocation());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     final MarkerOptions markerOptions = new MarkerOptions();
-                    markerOptions.position(location);
-                    markerOptions.title("Drone");
-                    markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (marker != null) {
-                                marker.remove();
+                    if (location != null) {
+                        markerOptions.position(location);
+                        markerOptions.title("Drone");
+                        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (marker != null) {
+                                    marker.remove();
+                                }
+                                marker = mMap.addMarker(markerOptions);
                             }
-                            marker = mMap.addMarker(markerOptions);
-                        }
-                    });
-                } catch (Exception e) {
-                    Toast.makeText(MapsActivity.this, "Exception", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
+                        });
+                    }
                 }
-            }
-        }, 0, 4, TimeUnit.SECONDS);
+            }, 0, 4, TimeUnit.SECONDS);
+        } catch (Exception e) {e.printStackTrace();}
+    }
+
+    private String getDroneLocation() throws Exception{
+        String response, location;
+        JSONObject json = ConnectActivity.getJSONObject("ACTION", "getLocation");
+        response = POST(json.toString(), null);
+        JSONObject jsonResponse;
+        jsonResponse = new JSONObject(response);
+        location = jsonResponse.get("POSITION").toString();
+        return location;
     }
 
     private LatLng stringToLatLong(String latLong){
@@ -170,11 +189,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 MarkerOptions options = new MarkerOptions();
                 options.position(point);
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(21));
-                if (markerPoints.size() == 1) {
-                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                } else if (markerPoints.size() > 2) {
-                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                }
+                options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 drawPolyLineOnMap(markerPoints);
                 mMap.addMarker(options);
             }
@@ -241,7 +256,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         markerOptions.title("Current Position");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+        //markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
         //mCurrLocationMarker = mMap.addMarker(markerOptions);
         //move map camera
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -326,38 +341,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String getAltitudeJSONArray() throws Exception {
         JSONArray altitudeArray = new JSONArray();
         for (LatLng latLong : markerPoints){
-            String altitudeUrl = "https://maps.googleapis.com/maps/api/elevation/json?locations=" +
-                    String.valueOf(latLong.latitude) + "," + String.valueOf(latLong.longitude) +
-                    "&key=AIzaSyAhqtoCwD_0ZBiB7caWjQe2tX1XML-TNTo&sensor=true";
-            String[] myParams = {altitudeUrl};
-            String response = new GetResponseFromServer().execute(myParams).get();
-            JSONObject jsonResponse = new JSONObject(response);
-            JSONArray resp = jsonResponse.getJSONArray("results");
-            JSONObject results = resp.getJSONObject(0);
-            String altitude = results.getString("elevation");
-            altitudeArray.put(altitude);
+            altitudeArray.put(getAltitude(latLong));
         }
         return altitudeArray.toString();
     }
 
+    private String getAltitude(LatLng location) throws Exception{
+        String altitudeUrl = "https://maps.googleapis.com/maps/api/elevation/json?locations=" +
+                String.valueOf(location.latitude) + "," + String.valueOf(location.longitude) +
+                "&key=AIzaSyAhqtoCwD_0ZBiB7caWjQe2tX1XML-TNTo&sensor=true";
+        String[] myParams = {altitudeUrl};
+        String response = new GetResponseFromServer().execute(myParams).get();
+        JSONObject jsonResponse = new JSONObject(response);
+        JSONArray resp = jsonResponse.getJSONArray("results");
+        JSONObject results = resp.getJSONObject(0);
+        return results.getString("elevation");
+    }
+
     @Override
-    public void onDestroy()
-    {
+    public void onDestroy() {
         scheduler.shutdown();
         super.onDestroy();
     }
 
     @Override
-    public void onBackPressed()
-    {
+    public void onBackPressed() {
         scheduler.shutdown();
         super.onBackPressed();
     }
 
     @Override
-    public void onResume()
-    {
+    public void onResume() {
         markDronePosition();
         super.onResume();
+    }
+
+    @Override
+    public void onPause(){
+        markDronePosition();
+        super.onPause();
     }
 }
