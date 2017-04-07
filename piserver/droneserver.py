@@ -67,16 +67,20 @@ class IndexPageHandler(tornado.web.RequestHandler):
         if data["ACTION"] == "sensor":
             reply = {"SENSOR":"132.0"}
         elif data["ACTION"] == "goWayPoint":
-            altList = ast.literal_eval(data["MARKER_ALT"])
-            mapList = ast.literal_eval(data["MARKERS"])
-            createMissionFile(mapList, int(round(float(data["RELATIVE_ALT"]))), int(round(float(data["ABSOLUTE_ALT"]))))
-            for i in range(len(mapList)):
-                lat, lng = ast.literal_eval(mapList[i])
-                print ++i, lat,  lng, int(round(float(altList[i]))), int(round(float(data["RELATIVE_ALT"]))), int(round(float(data["ABSOLUTE_ALT"])))
+            relAltList = ast.literal_eval(data["DRONE_RELATIVE_ALT"])
+            mapList = ast.literal_eval(data["DRONE_MARKERS"])
+            absAltList = ast.literal_eval(data["DRONE_MARKERS_ALT"])
+            createMissionFile(mapList, relAltList, absAltList)
             reply = {"REPLY": "Coordinates sent"}
         elif data["ACTION"] == "getLocation":
-            latLngList = ["1.2897150957619739,103.77706065773963", "1.289584036003337,103.77684272825718"]
-            reply = {"POSITION" : random.choice(latLngList)}
+            gpsData1 = {"location": ["1.2897150957619739", "103.77706065773963"],
+                         "altitude": "0", "humidity":"79.09999", "temperature":"30.39999996185",
+                         "datetime": "2017-04-06 22:32:32"}
+            gpsData1 = {"location": ["1.289584036003337", "103.77684272825718"],
+                         "altitude": "0", "humidity":"89.03333", "temperature":"31.59",
+                         "datetime": "2017-04-06 22:32:32"}
+            gpsList = [gpsdata1, gpsData2]
+            reply = {"DRONE_GPS" : random.choice(gpsList)}
         else:
             reply = {"REPLY" : "Command received"}
         reply = json.dumps(reply)

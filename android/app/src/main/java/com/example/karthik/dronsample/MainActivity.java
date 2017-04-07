@@ -18,19 +18,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    ToggleButton armToggleButton;
-    Button homeButton;
-    Button micButton;
-    Button videoRecButton;
-    Button droneUpButton;
-    Button droneDownButton;
-    Button forwardButton;
-    Button reverseButton;
-    Button leftButton;
-    Button rightButton;
-    Button captureButton;
+    ToggleButton armToggleBtn;
+    Button mapBtn;
+    Button micBtn;
+    Button videoBtn;
+    Button upBtn;
+    Button downBtn;
+    Button rollLeftBtn;
+    Button rollRightBtn;
+    Button forwardBtn;
+    Button reverseBtn;
+    Button leftBtn;
+    Button rightBtn;
+    Button pictureBtn;
+    Button tiltBtn;
+    Button returnHomeBtn;
     Button sensorBtn;
-    ToggleButton takeOffToggleButton;
+    ToggleButton takeOffToggleBtn;
     Toast mToast;
     static String url;
     private static final int REQUEST_CODE = 1234;
@@ -39,36 +43,47 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        armToggleButton = (ToggleButton) findViewById(R.id.tbtnArm);
-        homeButton = (Button) findViewById(R.id.btnReturn);
-        micButton = (Button) findViewById(R.id.btnRecord);
-        videoRecButton = (Button) findViewById(R.id.btnVideoRec);
-        droneUpButton = (Button) findViewById(R.id.btnDroneUp);
-        droneDownButton = (Button) findViewById(R.id.btnDroneDown);
-        forwardButton = (Button) findViewById(R.id.btnUp);
-        reverseButton = (Button) findViewById(R.id.btnDown);
-        leftButton = (Button) findViewById(R.id.btnLeft);
-        rightButton = (Button) findViewById(R.id.btnRight);
-        captureButton = (Button) findViewById(R.id.btnCapture);
-        takeOffToggleButton = (ToggleButton) findViewById(R.id.tbtnTakeOff);
-        sensorBtn = (Button) findViewById(R.id.sensor);
+        armToggleBtn = (ToggleButton) findViewById(R.id.tbtnArm);
+        mapBtn = (Button) findViewById(R.id.btnMap);
+        micBtn = (Button) findViewById(R.id.btnMic);
+        videoBtn = (Button) findViewById(R.id.btnVideo);
+        upBtn = (Button) findViewById(R.id.btnUp);
+        downBtn = (Button) findViewById(R.id.btnDown);
+        rollLeftBtn = (Button) findViewById(R.id.btnRollLeft);
+        rollRightBtn = (Button) findViewById(R.id.btnRollRight);
+        forwardBtn = (Button) findViewById(R.id.btnForward);
+        reverseBtn = (Button) findViewById(R.id.btnReverse);
+        leftBtn = (Button) findViewById(R.id.btnLeft);
+        rightBtn = (Button) findViewById(R.id.btnRight);
+        pictureBtn = (Button) findViewById(R.id.btnPicture);
+        takeOffToggleBtn = (ToggleButton) findViewById(R.id.tbtnTakeOff);
+        tiltBtn = (Button) findViewById(R.id.btnTilt);
+        sensorBtn = (Button) findViewById(R.id.btnSensor);
+        returnHomeBtn = (Button) findViewById(R.id.btnReturnHome);
         // Disable button if no voice recognition service is present
         PackageManager pm = getPackageManager();
         List<ResolveInfo> activities = pm.queryIntentActivities(
                 new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
         if (activities.size() == 0)
         {
-            micButton.setEnabled(false);
-            micButton.setText("Recognizer not present");
+            micBtn.setEnabled(false);
+            micBtn.setText("Recognizer not present");
         }
 
         url = getIntent().getStringExtra("URL");
 
-        homeButton.setOnClickListener(new View.OnClickListener(){
+        mapBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 Intent toMap = new Intent (getApplicationContext(), MapsActivity.class);
                 startActivity(toMap);
+            }
+        });
+        tiltBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent toSensor = new Intent (getApplicationContext(), TiltActivity.class);
+                startActivity(toSensor);
             }
         });
         sensorBtn.setOnClickListener(new View.OnClickListener() {
@@ -78,12 +93,12 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(toSensor);
             }
         });
-        armToggleButton.setOnClickListener(new View.OnClickListener(){
+        armToggleBtn.setOnClickListener(new View.OnClickListener(){
             JSONObject json;
             String message;
             @Override
             public void onClick(View v){
-                if (armToggleButton.isChecked()) {
+                if (armToggleBtn.isChecked()) {
                     json = ConnectActivity.getJSONObject("ACTION", "arm");
                     message = "Drone Armed";
                 } else {
@@ -93,12 +108,12 @@ public class MainActivity extends AppCompatActivity {
                 POST(json.toString(), message);
             }
         });
-        takeOffToggleButton.setOnClickListener(new View.OnClickListener(){
+        takeOffToggleBtn.setOnClickListener(new View.OnClickListener(){
                 JSONObject json;
                 String message;
                 @Override
                 public void onClick(View v){
-                    if (takeOffToggleButton.isChecked()) {
+                    if (takeOffToggleBtn.isChecked()) {
                         json = ConnectActivity.getJSONObject("ACTION", "autoTakeoff");
                         message = "Auto Take Off initiated";
                     } else {
@@ -108,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                     POST(json.toString(), message);
                 }
             });
-        droneUpButton.setOnTouchListener(new View.OnTouchListener() {
+        upBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "up");
             String message = "Drone move up";
             @Override
@@ -117,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-        droneDownButton.setOnTouchListener(new View.OnTouchListener() {
+        downBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "down");
             String message = "Drone move down";
             @Override
@@ -126,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-        forwardButton.setOnTouchListener(new View.OnTouchListener() {
+        forwardBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "forward");
             String message = "Drone move forward";
             @Override
@@ -135,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-        reverseButton.setOnTouchListener(new View.OnTouchListener() {
+        reverseBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "reverse");
             String message = "Drone move reverse";
             @Override
@@ -144,8 +159,26 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-        leftButton.setOnTouchListener(new View.OnTouchListener() {
+        leftBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "left");
+            String message = "Drone turn Left";
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                POST(json.toString(), message);
+                return false;
+            }
+        });
+        rightBtn.setOnTouchListener(new View.OnTouchListener() {
+            JSONObject json = ConnectActivity.getJSONObject("ACTION", "right");
+            String message = "Drone turn Right";
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                POST(json.toString(), message);
+                return false;
+            }
+        });
+        rollLeftBtn.setOnTouchListener(new View.OnTouchListener() {
+            JSONObject json = ConnectActivity.getJSONObject("ACTION", "rollLeft");
             String message = "Drone Roll Left";
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -153,8 +186,8 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-        rightButton.setOnTouchListener(new View.OnTouchListener() {
-            JSONObject json = ConnectActivity.getJSONObject("ACTION", "right");
+        rollRightBtn.setOnTouchListener(new View.OnTouchListener() {
+            JSONObject json = ConnectActivity.getJSONObject("ACTION", "rollRight");
             String message = "Drone Roll Right";
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -162,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-        videoRecButton.setOnClickListener(new View.OnClickListener(){
+        videoBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 JSONObject json = ConnectActivity.getJSONObject("ACTION", "video");
@@ -170,11 +203,19 @@ public class MainActivity extends AppCompatActivity {
                 POST(json.toString(), message);
             }
         });
-        captureButton.setOnClickListener(new View.OnClickListener(){
+        pictureBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 JSONObject json = ConnectActivity.getJSONObject("ACTION", "picture");
                 String message = "Image Captured";
+                POST(json.toString(), message);
+            }
+        });
+        returnHomeBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                JSONObject json = ConnectActivity.getJSONObject("ACTION", "returnHome");
+                String message = "return Home";
                 POST(json.toString(), message);
             }
         });

@@ -9,13 +9,13 @@
     tools:context="com.example.karthik.dronsample.MainActivity">
 
     <Button
-        android:id="@+id/btnUp"
+        android:id="@+id/btnForward"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@drawable/ic_keyboard_arrow_up_black_24dp"
         android:layout_marginBottom="13dp"
-        android:layout_above="@+id/btnCapture"
-        android:layout_alignStart="@+id/btnCapture" />
+        android:layout_above="@+id/btnPicture"
+        android:layout_alignStart="@+id/btnPicture" />
 
     <Button
         android:id="@+id/btnLeft"
@@ -24,7 +24,7 @@
         android:background="@drawable/ic_keyboard_arrow_left_black_24dp"
         android:layout_alignBaseline="@+id/btnRight"
         android:layout_alignBottom="@+id/btnRight"
-        android:layout_toStartOf="@+id/btnCapture"
+        android:layout_toStartOf="@+id/btnPicture"
         android:layout_marginEnd="13dp" />
 
     <Button
@@ -32,116 +32,138 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@drawable/ic_keyboard_arrow_right_black_24dp"
-        android:layout_alignBaseline="@+id/btnCapture"
-        android:layout_alignBottom="@+id/btnCapture"
+        android:layout_alignBaseline="@+id/btnPicture"
+        android:layout_alignBottom="@+id/btnPicture"
         android:layout_alignParentEnd="true" />
 
     <Button
-        android:id="@+id/btnCapture"
+        android:id="@+id/btnPicture"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@drawable/ic_photo_camera_black_24dp"
         android:layout_marginBottom="13dp"
-        android:layout_above="@+id/btnDown"
-        android:layout_alignStart="@+id/btnReturn" />
+        android:layout_above="@+id/btnReverse"
+        android:layout_toStartOf="@+id/btnRight"
+        android:layout_marginEnd="13dp" />
+
+    <Button
+        android:id="@+id/btnReverse"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/ic_keyboard_arrow_down_black_24dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/btnPicture"
+        android:layout_marginBottom="36dp" />
+
+    <ToggleButton
+        android:id="@+id/tbtnArm"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_alignBaseline="@+id/tbtnTakeOff"
+        android:layout_alignBottom="@+id/tbtnTakeOff"
+        android:layout_marginStart="35dp"
+        android:layout_toEndOf="@+id/tbtnTakeOff"
+        android:textOff="Arm"
+        android:textOn="Disarm" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/btnRollRight"
+        android:background="@drawable/ic_keyboard_arrow_right_black_24dp"
+        android:layout_alignBaseline="@+id/btnRollLeft"
+        android:layout_alignBottom="@+id/btnRollLeft"
+        android:layout_toEndOf="@+id/btnRollLeft"
+        android:layout_marginStart="17dp" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/btnRollLeft"
+        android:background="@drawable/ic_keyboard_arrow_left_black_24dp"
+        android:layout_below="@+id/btnPicture"
+        android:layout_alignStart="@+id/btnDown"
+        android:layout_marginTop="11dp" />
 
     <Button
         android:id="@+id/btnDown"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@drawable/ic_keyboard_arrow_down_black_24dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/btnCapture"
-        android:layout_marginBottom="36dp" />
-
-    <ToggleButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/tbtnArm"
-        android:textOn="Disarm"
-        android:textOff="Arm"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
-
-    <!--<Button-->
-        <!--android:layout_width="50dp"-->
-        <!--android:layout_height="50dp"-->
-        <!--android:id="@+id/btnDroneRight"-->
-        <!--android:background="@drawable/ic_action_right"-->
-        <!--android:layout_alignBaseline="@+id/btnDroneLeft"-->
-        <!--android:layout_alignBottom="@+id/btnDroneLeft"-->
-        <!--android:layout_toEndOf="@+id/btnDroneLeft" />-->
-
-    <!--<Button-->
-        <!--android:layout_width="50dp"-->
-        <!--android:layout_height="50dp"-->
-        <!--android:id="@+id/btnDroneLeft"-->
-        <!--android:background="@drawable/ic_action_left"-->
-        <!--android:layout_marginStart="19dp"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_alignParentStart="true"-->
-        <!--android:layout_marginBottom="14dp" />-->
+        android:layout_alignBaseline="@+id/btnLeft"
+        android:layout_alignBottom="@+id/btnLeft"
+        android:layout_alignStart="@+id/btnUp" />
 
     <Button
-        android:id="@+id/btnDroneDown"
+        android:id="@+id/btnUp"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:background="@drawable/ic_keyboard_arrow_down_black_24dp"
-        android:layout_above="@+id/btnDown"
-        android:layout_alignStart="@+id/btnDroneUp" />
-
-    <Button
-        android:id="@+id/btnDroneUp"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="21dp"
         android:background="@drawable/ic_keyboard_arrow_up_black_24dp"
-        android:layout_alignBaseline="@+id/btnUp"
-        android:layout_alignBottom="@+id/btnUp"
+        android:layout_marginStart="17dp"
+        android:layout_alignBaseline="@+id/btnForward"
+        android:layout_alignBottom="@+id/btnForward"
         android:layout_alignParentStart="true" />
 
     <Button
-        android:id="@+id/btnRecord"
+        android:id="@+id/btnMic"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@drawable/ic_keyboard_voice_black_24dp"
         android:onClick="micButtonClicked"
-        android:layout_alignBottom="@+id/btnReturn"
-        android:layout_alignStart="@+id/btnDroneUp" />
+        android:layout_alignBottom="@+id/btnMap"
+        android:layout_alignStart="@+id/btnVideo" />
 
     <Button
-        android:id="@+id/btnReturn"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
+        android:id="@+id/btnMap"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="13dp"
         android:background="@drawable/ic_map_black_24dp"
         android:layout_alignParentTop="true"
-        android:layout_toStartOf="@+id/btnRight"
-        android:layout_marginTop="14dp" />
+        android:layout_alignStart="@+id/btnForward" />
 
     <Button
-        android:id="@+id/btnVideoRec"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
+        android:id="@+id/btnVideo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:background="@drawable/ic_ondemand_video_black_24dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/btnDroneDown" />
+        android:layout_below="@+id/btnMic"
+        android:layout_alignStart="@+id/btnUp"
+        android:layout_marginTop="13dp" />
 
     <ToggleButton
         android:id="@+id/tbtnTakeOff"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
+        android:layout_alignBottom="@+id/btnRollRight"
+        android:layout_marginStart="30dp"
+        android:layout_toEndOf="@+id/btnRollRight"
         android:textOff="TakeOff"
-        android:textOn="Land"
-        android:layout_alignTop="@+id/btnReturn"
+        android:textOn="Land" />
+
+    <Button
+        android:id="@+id/btnTilt"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:text="Tilt"
+        android:layout_alignTop="@+id/btnSensor"
         android:layout_alignStart="@+id/tbtnArm" />
 
     <Button
-        android:id="@+id/sensor"
+        android:id="@+id/btnReturnHome"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignStart="@+id/btnRollRight"
+        android:layout_alignTop="@+id/btnTilt"
+        android:layout_marginStart="13dp"
+        android:background="@drawable/ic_home_black_24dp" />
+
+    <Button
+        android:id="@+id/btnSensor"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:text="Sensor"
-        android:layout_alignBottom="@+id/tbtnTakeOff"
-        android:layout_toEndOf="@+id/btnVideoRec" />
+        android:layout_height="50dp"
+        android:layout_above="@+id/btnVideo"
+        android:layout_alignStart="@+id/tbtnTakeOff"
+        android:text="Sensor" />
 
 </RelativeLayout>
