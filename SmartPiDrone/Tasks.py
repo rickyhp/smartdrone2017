@@ -86,13 +86,13 @@ def GetAllSensorDataThread(s1,s2,s3,s4,DHT_AM2302):
         print("Getting all data.....\r\n")
         HumidityAM2302Thread(DHT_AM2302)
         print("Sonar-1 :  %s cm\r\n" %s1.raw_distance(sample_size=7,sample_wait=0.1))
-        time.sleep(0.2)
+        time.sleep(0.1)
         print("Sonar-2 :  %s cm\r\n" %s2.raw_distance(sample_size=7,sample_wait=0.1))
-        time.sleep(0.2)
+        time.sleep(0.1)
         print("Sonar-3 :  %s cm\r\n" %s3.raw_distance(sample_size=7,sample_wait=0.1))
-        time.sleep(0.2)
+        time.sleep(0.1)
         print("Sonar-4 :  %s cm\r\n" %s4.raw_distance(sample_size=7,sample_wait=0.1))
-        time.sleep(0.2)
+        time.sleep(0.1)
 
 
 def SocketServeContinuousThread(server, dicData, timestamp ,commandexecutor,delay):

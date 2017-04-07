@@ -55,20 +55,24 @@ class Webserver:
     def ServeContinuously(self, dronedata,timestamp,commandexecutor):
         while True:
           
-            datetime = timestamp.getTimeStamp()
-            temperature = dronedata.getTemperature()
-            humidity = dronedata.getHumidity()
-            altitude = dronedata.getAltitude()
-            latitude = dronedata.getLatitude()
-            longitude = dronedata.getLongitude()
-
-            dicData = {"datetime": str(datetime) , "temperature":  str(temperature) ,
-                       "humidity": str(humidity),"altitude": str(altitude) , "latitude": str(latitude),"longitude":str(longitude)}
+##            datetime = timestamp.getTimeStamp()
+##            temperature = dronedata.getTemperature()
+##            humidity = dronedata.getHumidity()
+##            altitude = dronedata.getAltitude()
+##            latitude = dronedata.getLatitude()
+##            longitude = dronedata.getLongitude()
+##
+##            dicData = {"datetime": str(datetime) , "temperature":  str(temperature) ,
+##                      "humidity": str(humidity),"altitude": str(altitude) , "latitude": str(latitude),"longitude":str(longitude)}
+##
+##            dicData = {"datetime": str(datetime) , "temperature":  str(temperature) ,
+##                                   "humidity": str(humidity),"altitude": str(altitude) , "location": [str(latitude),str(longitude)]}
+           
 
             client, address = self.soc.accept()
-            client.sendall('Sending out drone data... \r\n\n')
-            client.sendall(json.dumps(dicData))# Send data  out in json format
-            print(json.dumps(dicData))
+##            client.sendall('Sending out drone data... \r\n\n')
+##            client.sendall(json.dumps(dicData))# Send data  out in json format
+##            print(json.dumps(dicData))
 
             req = client.recv(1024)
             print req
@@ -96,17 +100,17 @@ class Webserver:
                     print "latitude and longitude : ", location[item]          
 
             #Send drone data out when 'getLocation' command is received
-            if commandexecutor.cmd =='getLoction':
+            if commandexecutor.cmd =='getLocation':
                 
                 datetime = timestamp.getTimeStamp()
                 temperature = dronedata.getTemperature()
                 humidity = dronedata.getHumidity()
-                altitude = dronedata.getAltitude()
-                latitude = dronedata.getLatitude()
-                longitude = dronedata.getLongitude()
+                altitude = 5 # dronedata.getAltitude()
+                latitude = 1.235465 #dronedata.getLatitude()
+                longitude = 10.8767829 #dronedata.getLongitude()
                 
                 dicData = {"datetime": str(datetime) , "temperature":  str(temperature) ,
-                           "humidity": str(humidity),"altitude": str(altitude) , "latitude": str(latitude),"longitude":str(longitude)}
+                                   "humidity": str(humidity),"altitude": str(altitude) , "location": [str(latitude),str(longitude)]}
 
                 print "Sending location data....\r\n"
                 client.sendall(json.dumps(dicData))# Send data  out in json format

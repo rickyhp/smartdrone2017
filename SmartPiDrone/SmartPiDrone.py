@@ -49,17 +49,6 @@ def main():
     dronedata = DroneData()
     commandexecutor = CmdExecutor()
 
-    
-##    # Connect to the Vehicle
-##    print "Connecting..."
-##
-##    #vehicle = connect('127.0.0.1:14550', wait_ready=True)
-##    #vehicle = connect('/dev/ttyS0', wait_ready=True,baud=57600)
-##     
-##    vehicle = mavlinkcmd.connect_vehicle()
-##
-##    print "Vehicle connected!"
-##    print("Performing system check....")
 
     #************************************************************************#
 
@@ -69,6 +58,14 @@ def main():
     #For testing purpose
     #commandexecutor.cmd = 11
     #commandexecutor .executeCmd()
+
+##    # Connect to the Vehicle
+##    print "Connecting Pixhawk.....\r\n\n"
+##    #vehicle = connect('127.0.0.1:14550', wait_ready=True)
+##    #vehicle = connect('/dev/ttyS0', wait_ready=True,baud=57600)  
+##    vehicle = mavlinkcmd.connect_vehicle()
+##    print "Vehicle connected!"
+##    print "Smart Drone is ready."
     
     #************************************************************************#
 

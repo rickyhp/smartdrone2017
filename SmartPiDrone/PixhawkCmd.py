@@ -19,6 +19,7 @@ class PixhawkCmd:
     def __init__(self):
         print "PixhawkCmd object initialized!\r\n\n"
         
+        
     def doNothing():
         print "None\r\n"
 
@@ -30,7 +31,11 @@ class PixhawkCmd:
 
     def connect(self,connstring):
         print "Connecting to Drone.... \r\n\n"
+        #Connect Pixhawk via UDP (connect to sitl)
         self.vehicle = connect(connstring, wait_ready=True)
+        #Connect Pixhawk via Serial
+        #self.vehicle = connect(connstring, wait_ready=True,baud=57600)
+        #self.vehicle = connect('/dev/ttyS0', wait_ready=True,baud=57600)
         
     def disconnect(self):
         print "Disconnecting from Drone.... \r\n\n"

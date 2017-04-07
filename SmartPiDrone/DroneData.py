@@ -61,16 +61,19 @@ class DroneData:
         return self.humidity
 
     def getAltitude(self):
-        ##Add code here
+        ##Add code here for getting altitude data from Pixhawk
         return self.altitude
 
     def getLatitude(self):
-        ##Add code here
+        ##Add code here for getting latitude data from Pixhawk
         return self.latitude
 
     def getLongitude(self):
-        ##Add code here
+        ##Add code here for getting longitude data from Pixhawk
         return self.longitude
+
+    def getLocation(self):
+        return [(self.latitude,self.longitude)]
 
     def getSonar1_ObsDistance():
         return self.sonar1_objdis.raw_distance(sample_size=7,sample_wait=0.1)
