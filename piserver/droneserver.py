@@ -76,11 +76,11 @@ class IndexPageHandler(tornado.web.RequestHandler):
             gpsData1 = {"location": ["1.2897150957619739", "103.77706065773963"],
                          "altitude": "0", "humidity":"79.09999", "temperature":"30.39999996185",
                          "datetime": "2017-04-06 22:32:32"}
-            gpsData1 = {"location": ["1.289584036003337", "103.77684272825718"],
+            gpsData2 = {"location": ["1.289584036003337", "103.77684272825718"],
                          "altitude": "0", "humidity":"89.03333", "temperature":"31.59",
                          "datetime": "2017-04-06 22:32:32"}
-            gpsList = [gpsdata1, gpsData2]
-            reply = {"DRONE_GPS" : random.choice(gpsList)}
+            gpsList = [gpsData1, gpsData2]
+            reply = {"DRONE_GPS" : random.choice(gpsList)} 
         else:
             reply = {"REPLY" : "Command received"}
         reply = json.dumps(reply)

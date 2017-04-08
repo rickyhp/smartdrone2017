@@ -24,10 +24,13 @@ class PostResponseToServer extends AsyncTask<String, Void, String> {
                 .build();
         try {
             Response response = client.newCall(request).execute();
-            responseString = response.body().string();
-            Log.v("ResponseFromServer", responseString);
+            if (response != null) {
+                responseString = response.body().string();
+                Log.v("ResponseFromServer", responseString);
+            }
         } catch (Exception e) {
             Log.v("ResponseFromServer", "Network Failure");
+            Log.v("ResponseFromServer", e.toString());
             e.printStackTrace();
         }
         return responseString;
