@@ -11,8 +11,7 @@ import urllib2
 import re
 import requests
 import webbrowser
-from flask import Flask
-from flask import Flask , render_template 
+
 import cgi
 import cgitb
 from DroneData import *
@@ -36,7 +35,10 @@ class Webserver:
         self.soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR , 1)# For reusage of port
         #self.soc.bind((self.host, self.port))           # Bind to localhost and port
         #self.soc.bind(('169.254.138.189',self.port))# Bind to IP & port , (eth0)
-        self.soc.bind(('192.168.0.147',self.port))# Bind to IP & port , (wlan0)
+        #self.soc.bind(('192.168.0.147',self.port))# Bind to IP & port , (wlan0)
+        self.soc.bind(('192.168.43.148',self.port))# Bind to IP & port , (wlan0)
+        #self.soc.bind(('192.168.1.1',self.port))# Bind to IP & port , (wlan0)
+
 
     def waitForConnection(self):
         self.soc.listen(5)                 # Now wait for client connection (5 connections).
@@ -61,9 +63,6 @@ class Webserver:
 ##            altitude = dronedata.getAltitude()
 ##            latitude = dronedata.getLatitude()
 ##            longitude = dronedata.getLongitude()
-##
-##            dicData = {"datetime": str(datetime) , "temperature":  str(temperature) ,
-##                      "humidity": str(humidity),"altitude": str(altitude) , "latitude": str(latitude),"longitude":str(longitude)}
 ##
 ##            dicData = {"datetime": str(datetime) , "temperature":  str(temperature) ,
 ##                                   "humidity": str(humidity),"altitude": str(altitude) , "location": [str(latitude),str(longitude)]}
@@ -109,8 +108,8 @@ class Webserver:
                 latitude = 1.235465 #dronedata.getLatitude()
                 longitude = 10.8767829 #dronedata.getLongitude()
                 
-                dicData = {"datetime": str(datetime) , "temperature":  str(temperature) ,
-                                   "humidity": str(humidity),"altitude": str(altitude) , "location": [str(latitude),str(longitude)]}
+                dicData = {"DRONE_GPS":{"datetime": str(datetime) , "temperature":  str(temperature) ,
+                                   "humidity": str(humidity),"altitude": str(altitude) , "location": [str(latitude),str(longitude)]}}
 
                 print "Sending location data....\r\n"
                 client.sendall(json.dumps(dicData))# Send data  out in json format
