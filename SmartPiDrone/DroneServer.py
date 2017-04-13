@@ -25,7 +25,6 @@ from Tasks import *
 from MavLinkSerialComm import *
 from dronekit import connect, Command, LocationGlobal, VehicleMode
 from pymavlink import mavutil
-from PixhawkCmd import PixhawkCmd
 
 global vehicle
 global cycle
@@ -123,8 +122,8 @@ class IndexPageHandler(tornado.web.RequestHandler):
             elif data["ACTION"] == 'tiltValue':
                 reply = {"REPLY" : "Command received: RollValue" + data["ROLL"]}
             elif data["ACTION"] == "connect":
-                 commandexecutor.connect()
-                 reply = {"REPLY" : "Command received: Connect"}
+                commandexecutor.connect()
+                reply = {"REPLY" : "Command received: Connect"}
             else:
                 #commandexecutor.setCmd(data["ACTION"])
                 reply = {"REPLY" : "Command received: " + data["ACTION"]}
@@ -149,7 +148,7 @@ class Application(tornado.web.Application):
  
  
 if __name__ == '__main__':
-    mavlinkcmd = MavLinkCmd()
+    #mavlinkcmd = MavLinkCmd()
     #sonar1 = UltrasonicSensor(4,17)
     #sonar2 = UltrasonicSensor(23,24)
     #sonar3 = UltrasonicSensor(27,22)
