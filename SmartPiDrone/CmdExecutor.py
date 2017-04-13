@@ -50,7 +50,7 @@ class CmdExecutor:
     def goWayPoint():
         print "WayPoint \r\n\n"
 
-    def connect():
+    def connect(self):
         print "Connecting to Pixhawk.... \r\n\n"
         #self.pixhawkCmd.connect(connstring)
         # Connect Pixhawk via UDP (connect to sitl)
