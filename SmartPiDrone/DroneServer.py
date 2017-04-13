@@ -25,6 +25,7 @@ from Tasks import *
 from MavLinkSerialComm import *
 from dronekit import connect, Command, LocationGlobal, VehicleMode
 from pymavlink import mavutil
+from PixhawkCmd import PixhawkCmd
 
 global vehicle
 global cycle
@@ -40,6 +41,7 @@ appcmd = 'doNothing'
 timestamp = TimeStamp()
 droneData = DroneData()
 commandexecutor = CmdExecutor()
+pixcmd = PixhawkCmd()
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
@@ -121,6 +123,9 @@ class IndexPageHandler(tornado.web.RequestHandler):
                 reply = {"REPLY" : "Command received: " + voiceDict[data["ACTION"]]}
             elif data["ACTION"] == 'tiltValue':
                 reply = {"REPLY" : "Command received: RollValue" + data["ROLL"]}
+            elif data["ACTION"] == "connect":
+                 pixcmd.connect('/dev/ttyAMA0', baud=57600, wait_ready=True)
+                 reply = {"REPLY" : "Command received: Connect"}
             else:
                 #commandexecutor.setCmd(data["ACTION"])
                 reply = {"REPLY" : "Command received: " + data["ACTION"]}
