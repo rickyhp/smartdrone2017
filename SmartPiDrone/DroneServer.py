@@ -83,7 +83,7 @@ class IndexPageHandler(tornado.web.RequestHandler):
                     'forward', 'reverse', 'connect', 'autoTakeoff', 'autoLand',
                     'goWayPoint', 'getLocation', 'sensor', 'tiltOn', 'tiltOff', 'tiltValue',
                     'take off', 'land', 'tilt on', 'tilt off', 'rollLeft', 'rollRight',
-                    'roll left', 'roll right']
+                    'roll left', 'roll right', 'arm' , 'disarm']
         if self.request.body:
             print "Got JSON data:", self.request.body
             data = json.loads(self.request.body)
