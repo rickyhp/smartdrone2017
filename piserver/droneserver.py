@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""droneserver.py: Handles incoming socket request and send command to FC using Multiwii Serial Protocol."""
+"""droneserver.py: Handles incoming socket request and send command to FC using Mavlink."""
 
 __author__ = "Ricky Putra"
 __copyright__ = "Copyright 2017"
@@ -18,9 +18,11 @@ import tornado.ioloop
 import json
 import ast
 import random
-
+from PixhawkCmd import PixhawkCmd
 from new_mission import createFile as createMissionFile
- 
+
+pixcmd = None
+
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
         return True
@@ -64,6 +66,7 @@ class IndexPageHandler(tornado.web.RequestHandler):
         if self.request.body:
             print "Got JSON data:", self.request.body
             data = json.loads(self.request.body)
+        
         if data["ACTION"] == "sensor":
             reply = {"SENSOR":"132.0"}
         elif data["ACTION"] == "goWayPoint":
@@ -81,6 +84,9 @@ class IndexPageHandler(tornado.web.RequestHandler):
                          "datetime": "2017-04-06 22:32:32"}
             gpsList = [gpsData1, gpsData2]
             reply = {"DRONE_GPS" : random.choice(gpsList)} 
+        elif data["ACTION"] == "connect":
+            pixcmd.connect('udp:192.168.0.102:14549') 
+            print "drone connected"
         else:
             reply = {"REPLY" : "Command received"}
         reply = json.dumps(reply)
@@ -99,10 +105,10 @@ class Application(tornado.web.Application):
             'template_path': 'templates'
         }
         tornado.web.Application.__init__(self, handlers, **settings)
- 
- 
+                
 if __name__ == '__main__':
     port = 8080
+    pixcmd = PixhawkCmd()
     ws_app = Application()
     server = tornado.httpserver.HTTPServer(ws_app)
     server.listen(port)
