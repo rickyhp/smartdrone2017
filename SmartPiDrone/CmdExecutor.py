@@ -65,11 +65,11 @@ class CmdExecutor:
         #self.vehicle.close()
         
         
-    def arm():
+    def arm(self):
         print "Arming motor.... \r\n\n"
         self.pixhawkCmd.arm()
         
-    def disarm():
+    def disarm(self):
         print "Disarm motor.... \r\n\n"
         self.pixhawkCmd.disarm()
         
