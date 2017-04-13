@@ -89,7 +89,7 @@ class PixhawkCmd:
             print "Keyboard Interrupt on landing."
         
     def disarm(self):
-        if(self.vehicle.armed):
+        if(self.vehicle != None and self.vehicle.armed):
             print "Disarming motor.... \r\n\n"
             self.vehicle.armed   = False
             while self.vehicle.armed:
