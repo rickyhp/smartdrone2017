@@ -32,7 +32,7 @@ class PixhawkCmd:
     def connect(self,connstring):
         print "Connecting to Drone.... \r\n\n"
         #Connect Pixhawk via UDP (connect to sitl)
-        self.vehicle = connect(connstring, wait_ready=True)
+        self.vehicle = connect(connstring, wait_ready=True, baud=57600)
         #Connect Pixhawk via Serial
         #self.vehicle = connect(connstring, wait_ready=True,baud=57600)
         #self.vehicle = connect('/dev/ttyS0', wait_ready=True,baud=57600)
