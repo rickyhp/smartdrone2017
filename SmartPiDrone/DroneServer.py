@@ -41,7 +41,6 @@ appcmd = 'doNothing'
 timestamp = TimeStamp()
 droneData = DroneData()
 commandexecutor = CmdExecutor()
-pixcmd = PixhawkCmd()
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
@@ -124,7 +123,7 @@ class IndexPageHandler(tornado.web.RequestHandler):
             elif data["ACTION"] == 'tiltValue':
                 reply = {"REPLY" : "Command received: RollValue" + data["ROLL"]}
             elif data["ACTION"] == "connect":
-                 pixcmd.connect('/dev/ttyAMA0', baud=57600, wait_ready=True)
+                 commandexecutor.connect()
                  reply = {"REPLY" : "Command received: Connect"}
             else:
                 #commandexecutor.setCmd(data["ACTION"])
@@ -151,26 +150,26 @@ class Application(tornado.web.Application):
  
 if __name__ == '__main__':
     mavlinkcmd = MavLinkCmd()
-    sonar1 = UltrasonicSensor(4,17)
-    sonar2 = UltrasonicSensor(23,24)
-    sonar3 = UltrasonicSensor(27,22)
-    sonar4 = UltrasonicSensor(12,16)
-    HuTempSensor = Adafruit_DHT.AM2302
+    #sonar1 = UltrasonicSensor(4,17)
+    #sonar2 = UltrasonicSensor(23,24)
+    #sonar3 = UltrasonicSensor(27,22)
+    #sonar4 = UltrasonicSensor(12,16)
+    #HuTempSensor = Adafruit_DHT.AM2302
 
     try:
-        try:
+    #    try:
             #thread.start_new_thread(SocketServeContinuousThread, (webserver, dronedata, timestamp ,commandexecutor, 2, ))
             #thread.start_new_thread(performOperationThread, (commandexecutor, ))  
-            thread.start_new_thread(Sonar1Thread, (sonar1, ))
-            thread.start_new_thread(Sonar2Thread, (sonar2, ))
-            thread.start_new_thread(Sonar3Thread, (sonar3, ))
-            thread.start_new_thread(Sonar4Thread, (sonar4, ))
-            thread.start_new_thread(HumidityAM2302Thread, (HuTempSensor, ))
+    #        thread.start_new_thread(Sonar1Thread, (sonar1, ))
+    #        thread.start_new_thread(Sonar2Thread, (sonar2, ))
+    #        thread.start_new_thread(Sonar3Thread, (sonar3, ))
+    #        thread.start_new_thread(Sonar4Thread, (sonar4, ))
+    #        thread.start_new_thread(HumidityAM2302Thread, (HuTempSensor, ))
             #thread.start_new_thread(GetAllSensorDataThread, (sonar1,sonar2,sonar3,sonar4,HudTempSensor, ))       
             #thread.start_new_thread(SocketServerThread, (webserver, dronedata, timestamp ,5, ))
             #thread.start_new_thread(MavLinkSerialCommThread, (mavlinkdata, ))
-        except:
-            print "Error: unable to start thread"
+    #    except:
+    #        print "Error: unable to start thread"
         port = 8080
         ws_app = Application()
         server = tornado.httpserver.HTTPServer(ws_app)
