@@ -11,13 +11,14 @@ import urllib2
 import re
 import requests
 import webbrowser
-from flask import Flask
-from flask import Flask , render_template 
+#from flask import Flask
+#from flask import Flask , render_template 
 import cgi
 import cgitb
 from DroneData import *
 from CmdExecutor import *
-
+import ast
+from new_mission import createFile
 
 
 class Webserver:
@@ -36,7 +37,10 @@ class Webserver:
         self.soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR , 1)# For reusage of port
         #self.soc.bind((self.host, self.port))           # Bind to localhost and port
         #self.soc.bind(('169.254.138.189',self.port))# Bind to IP & port , (eth0)
-        self.soc.bind(('192.168.0.147',self.port))# Bind to IP & port , (wlan0)
+        #self.soc.bind(('192.168.0.147',self.port))# Bind to IP & port , (wlan0)
+        self.soc.bind(('192.168.43.148',self.port))# Bind to IP & port , (wlan0)
+        #self.soc.bind(('192.168.1.1',self.port))# Bind to IP & port , (wlan0)
+
 
     def waitForConnection(self):
         self.soc.listen(5)                 # Now wait for client connection (5 connections).
@@ -63,9 +67,6 @@ class Webserver:
 ##            longitude = dronedata.getLongitude()
 ##
 ##            dicData = {"datetime": str(datetime) , "temperature":  str(temperature) ,
-##                      "humidity": str(humidity),"altitude": str(altitude) , "latitude": str(latitude),"longitude":str(longitude)}
-##
-##            dicData = {"datetime": str(datetime) , "temperature":  str(temperature) ,
 ##                                   "humidity": str(humidity),"altitude": str(altitude) , "location": [str(latitude),str(longitude)]}
            
 
@@ -74,7 +75,7 @@ class Webserver:
 ##            client.sendall(json.dumps(dicData))# Send data  out in json format
 ##            print(json.dumps(dicData))
 
-            req = client.recv(1024)
+            req = client.recv(4096)
             print req
 
             location = {}
@@ -82,8 +83,11 @@ class Webserver:
             # Split header and payload body
             body = req.split('\r\n\r\n',1)[1]
 
+
             #Convert body into json object 
-            parsed_json = json.loads(body)
+            parsed_json = json.loads(body)#
+
+            #import pdb; pdb.set_trace()
 
             print "Size of received Jason array : ", len(parsed_json),"\r\n"
 
@@ -92,12 +96,20 @@ class Webserver:
                 commandexecutor.cmd = parsed_json["ACTION"] 
                 print "Parsed JSON CMD : ",commandexecutor.cmd
                             
-            elif len(parsed_json) ==2:
+            elif len(parsed_json) > 1:
                 commandexecutor.cmd = parsed_json["ACTION"]
-                commandexecutor.locMap = parsed_json["MAP"]
-                for item in range(len(commandexecutor.locMap)):
-                    location[item] = commandexecutor.locMap[item]
-                    print "latitude and longitude : ", location[item]          
+                print "Parsed WapPoint CMD : ",commandexecutor.cmd
+                #commandexecutor.locMap = parsed_json["DRONE_MARKERS"]#["MAP"]
+                
+                relAltList = ast.literal_eval(parsed_json["DRONE_RELATIVE_ALT"])
+                mapList = ast.literal_eval(parsed_json["DRONE_MARKERS"])
+                absAltList = ast.literal_eval(parsed_json["DRONE_MARKERS_ALT"])
+                
+                createFile(mapList, relAltList, absAltList)
+		print mapList, relAltList, absAltList		
+                #for item in range(len(commandexecutor.locMap)):
+                #    location[item] = commandexecutor.locMap[item]
+                #    print "latitude and longitude : ", location[item]          
 
             #Send drone data out when 'getLocation' command is received
             if commandexecutor.cmd =='getLocation':
@@ -106,15 +118,26 @@ class Webserver:
                 temperature = dronedata.getTemperature()
                 humidity = dronedata.getHumidity()
                 altitude = 5 # dronedata.getAltitude()
-                latitude = 1.235465 #dronedata.getLatitude()
-                longitude = 10.8767829 #dronedata.getLongitude()
+                latitude = 1.289584036003337 #dronedata.getLatitude()
+                longitude = 103.77684272825718 #dronedata.getLongitude()
                 
-                dicData = {"datetime": str(datetime) , "temperature":  str(temperature) ,
-                                   "humidity": str(humidity),"altitude": str(altitude) , "location": [str(latitude),str(longitude)]}
+                dicData = {"DRONE_GPS":{"datetime": str(datetime) , "temperature":  str(temperature) ,
+                                   "humidity": str(humidity),"altitude": str(altitude) , "location": [str(latitude),str(longitude)]}}
 
                 print "Sending location data....\r\n"
                 client.sendall(json.dumps(dicData))# Send data  out in json format
                 print(json.dumps(dicData))
+                print "Size of transmitted Jason array : ", len(dicData),"\r\n"
+
+
+
+##            if commandexecutor.cmd =='goWayPoint':
+##                commandexecutor.cmd = parsed_json["ACTION"]
+##                print "Parsed WapPoint CMD : ",commandexecutor.cmd
+##                commandexecutor.locMap = parsed_json["DRONE_MARKERS"]
+##                for item in range(len(commandexecutor.locMap)):
+##                    location[item] = commandexecutor.locMap[item]
+##                    print "Way Points (latitude and longitude) : ", location[item]   
                 
             
             client.close()  # Close the connection

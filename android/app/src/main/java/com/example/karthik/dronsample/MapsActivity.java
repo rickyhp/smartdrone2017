@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -34,6 +35,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
@@ -58,10 +60,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
     Marker mCurrLocationMarker;
+    Polyline polyline;
     LocationRequest mLocationRequest;
     ArrayList<LatLng> markerPoints;
     Button submitBtn;
     Marker marker;
+    HashMap<String, String> droneData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,10 +113,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             JSONObject json = ConnectActivity.getJSONObject("ACTION", "goWayPoint");
                             try {
                                 json.put("DRONE_MARKERS", getDroneMarkerArray());
-                                json.put("DRONE_MARKERS_ALT",
-                                        getAbsoluteAltArray(getDroneLatLngArray()));
+                                json.put("DRONE_MARKERS_ALT", droneData.get("ALTITUDE"));
                                 json.put("DRONE_RELATIVE_ALT", getRelativeAltArray(altitudeArray));
                             } catch (Exception e) {
+                                Log.v("EXCEPTION_LOG", e.toString());
                                 e.printStackTrace();
                             }
                             String message = "Coordinates sent";
@@ -134,12 +138,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             scheduler.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                    HashMap<String, String> droneData = new HashMap<>();
-                    try {
-                        droneData = getDroneGpsData();
-                    } catch (Exception e) {e.printStackTrace();}
-                    String latLngLoc = droneData.get("LATITUDE") + "," + droneData.get("LONGITUDE");
-                    LatLng location = stringToLatLong(latLngLoc);
+                    final HashMap<String, String> gpsData = getDroneGpsData();
+                    String latLngLoc = gpsData.get("LATITUDE") + "," + gpsData.get("LONGITUDE");
+                    final LatLng location = stringToLatLong(latLngLoc);
                     final MarkerOptions markerOptions = new MarkerOptions();
                     if (location != null) {
                         markerOptions.position(location);
@@ -151,41 +152,54 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 if (marker != null) {
                                     marker.remove();
                                 }
+                                if (polyline != null){
+                                    polyline.remove();
+                                }
+                                droneData = gpsData;
+                                Log.d("GPSDATA", droneData.toString());
                                 marker = mMap.addMarker(markerOptions);
+                                drawPolyLineDroneMarker(location);
                             }
                         });
                     }
                 }
-            }, 0, 4, TimeUnit.SECONDS);
-        } catch (Exception e) {e.printStackTrace();}
+            }, 0, 6, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private String getDroneLocation() throws Exception{
-        String response, location;
-        JSONObject json = ConnectActivity.getJSONObject("ACTION", "getLocation");
-        response = POST(json.toString(), null);
-        JSONObject jsonResponse = new JSONObject(response);
-        JSONArray locationData = jsonResponse.getJSONObject("DRONE_GPS").getJSONArray("location");
-        location = locationData.getString(0) + "," + locationData.getString(1);
-        return location;
+    private String getDroneLocation() {
+        return droneData.get("LATITUDE") + "," + droneData.get("LONGITUDE");
     }
 
-    private HashMap<String, String> getDroneGpsData() throws Exception{
+    private HashMap<String, String> getDroneGpsData() {
         HashMap<String, String> gpsData = new HashMap<>();
         String latitude, longitude, humidity, temperature;
-        JSONObject json = ConnectActivity.getJSONObject("ACTION", "getLocation");
-        String response = POST(json.toString(), null);
-        JSONObject jsonResponse = new JSONObject(response);
-        JSONObject gps = jsonResponse.getJSONObject("DRONE_GPS");
-        JSONArray locationData = gps.getJSONArray("location");
-        latitude = locationData.getString(0);
-        longitude = locationData.getString(1);
-        humidity = gps.getString("humidity");
-        temperature = gps.getString("temperature");
-        gpsData.put("LATITUDE", latitude);
-        gpsData.put("LONGITUDE", longitude);
-        gpsData.put("HUMIDITY", humidity);
-        gpsData.put("TEMPERATURE", temperature);
+        try {
+            JSONObject json = ConnectActivity.getJSONObject("ACTION", "getLocation");
+            String response = POST(json.toString(), null);
+            JSONObject jsonResponse = new JSONObject(response);
+            JSONObject gps = jsonResponse.getJSONObject("DRONE_GPS");
+            JSONArray locationData = gps.getJSONArray("location");
+            latitude = locationData.getString(0);
+            longitude = locationData.getString(1);
+            humidity = gps.getString("humidity");
+            temperature = gps.getString("temperature");
+            gpsData.put("ALTITUDE", getAltitude(new LatLng(Double.valueOf(latitude),
+                    Double.valueOf(longitude))));
+            gpsData.put("LATITUDE", latitude);
+            gpsData.put("LONGITUDE", longitude);
+            gpsData.put("HUMIDITY", humidity);
+            gpsData.put("TEMPERATURE", temperature);
+            //        gpsData.put("LATITUDE", "1.2897150957619739");
+//        gpsData.put("LONGITUDE", "103.77706065773963");
+//        gpsData.put("HUMIDITY", "79.09999");
+//        gpsData.put("TEMPERATURE", "30.39999996185");
+        } catch (Exception e){
+            e.printStackTrace();
+            Log.d("EXCEPTION_LOG", e.toString());
+        }
         return gpsData;
     }
 
@@ -226,12 +240,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 MarkerOptions options = new MarkerOptions();
                 options.position(point);
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(21));
-                options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
                 drawPolyLineOnMap(markerPoints);
                 mMap.addMarker(options);
             }
         });
-
         mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng point) {
@@ -239,6 +252,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 markerPoints.clear();
             }
         });
+    }
+
+    private void drawPolyLineDroneMarker(LatLng location) {
+        if (markerPoints.size() != 0) {
+            polyline = mMap.addPolyline(new PolylineOptions()
+                        .color(Color.RED)
+                        .width(8)
+                        .add(location, markerPoints.get(0)));
+        }
     }
 
     public void drawPolyLineOnMap(List<LatLng> list) {
@@ -366,13 +388,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return response;
     }
 
-    private String getAbsoluteAltArray(ArrayList<LatLng> markers) throws Exception {
-        JSONArray altitudeArray = new JSONArray();
-        for (LatLng latLong : markers){
-            altitudeArray.put(getAltitude(latLong));
-        }
-        return altitudeArray.toString();
-    }
+//    private String getAbsoluteAltArray(ArrayList<LatLng> markers) throws Exception {
+//        JSONArray altitudeArray = new JSONArray();
+//        for (LatLng latLong : markers){
+//            altitudeArray.put(getAltitude(latLong));
+//        }
+//        return altitudeArray.toString();
+//    }
 
     private String getRelativeAltArray(ArrayList<String> arrayList) throws Exception{
         JSONArray relativeAltArray = new JSONArray();
@@ -397,6 +419,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ArrayList<String> getDroneMarkerArray() throws Exception{
         ArrayList<String> droneMarkerArray = new ArrayList<>();
         LatLng droneLoc = stringToLatLong(getDroneLocation());
+//        LatLng droneLoc = new LatLng(1.2897150957619739, 103.77706065773963);
         droneMarkerArray.add(getLatLngTupleString(droneLoc));
         droneMarkerArray.add(getLatLngTupleString(droneLoc));
         for (LatLng latLng:markerPoints){
@@ -405,16 +428,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return droneMarkerArray;
     }
 
-    private ArrayList<LatLng> getDroneLatLngArray() throws Exception {
-        ArrayList<LatLng> droneLatLngArray = new ArrayList<>();
-        LatLng droneLoc = stringToLatLong(getDroneLocation());
-        droneLatLngArray.add(droneLoc);
-        droneLatLngArray.add(droneLoc);
-        for (LatLng latLng:markerPoints){
-            droneLatLngArray.add(latLng);
-        }
-        return droneLatLngArray;
-    }
+//    private ArrayList<LatLng> getDroneLatLngArray() throws Exception {
+//        ArrayList<LatLng> droneLatLngArray = new ArrayList<>();
+//        LatLng droneLoc = stringToLatLong(getDroneLocation());
+////        LatLng droneLoc = new LatLng(1.2897150957619739, 103.77706065773963);
+//        droneLatLngArray.add(droneLoc);
+//        droneLatLngArray.add(droneLoc);
+//        for (LatLng latLng:markerPoints){
+//            droneLatLngArray.add(latLng);
+//        }
+//        return droneLatLngArray;
+//    }
 
     private String getLatLngTupleString(LatLng latLng){
         String result;

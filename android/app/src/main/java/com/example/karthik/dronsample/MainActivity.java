@@ -1,23 +1,32 @@
 package com.example.karthik.dronsample;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
     ToggleButton armToggleBtn;
     Button mapBtn;
     Button micBtn;
@@ -31,18 +40,29 @@ public class MainActivity extends AppCompatActivity {
     Button leftBtn;
     Button rightBtn;
     Button pictureBtn;
-    Button tiltBtn;
+    ToggleButton tiltBtn;
     Button returnHomeBtn;
     Button sensorBtn;
     ToggleButton takeOffToggleBtn;
     Toast mToast;
+    TextView tvTilt;
+    private static final String TAG = "MainActivity";
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private Sensor magnetometer;
+    private float[] mGravity;
+    private float[] mGeomagnetic;
     static String url;
+    public JSONObject jsonTilt;
+//    private Thread tiltThread;
     private static final int REQUEST_CODE = 1234;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Initialize all the variables
         armToggleBtn = (ToggleButton) findViewById(R.id.tbtnArm);
         mapBtn = (Button) findViewById(R.id.btnMap);
         micBtn = (Button) findViewById(R.id.btnMic);
@@ -57,9 +77,19 @@ public class MainActivity extends AppCompatActivity {
         rightBtn = (Button) findViewById(R.id.btnRight);
         pictureBtn = (Button) findViewById(R.id.btnPicture);
         takeOffToggleBtn = (ToggleButton) findViewById(R.id.tbtnTakeOff);
-        tiltBtn = (Button) findViewById(R.id.btnTilt);
+        tiltBtn = (ToggleButton) findViewById(R.id.btnTilt);
         sensorBtn = (Button) findViewById(R.id.btnSensor);
         returnHomeBtn = (Button) findViewById(R.id.btnReturnHome);
+        tvTilt = (TextView) findViewById(R.id.tvTilt);
+
+        // Keep the screen on
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        // Setup the sensors
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
         // Disable button if no voice recognition service is present
         PackageManager pm = getPackageManager();
         List<ResolveInfo> activities = pm.queryIntentActivities(
@@ -70,8 +100,10 @@ public class MainActivity extends AppCompatActivity {
             micBtn.setText("Recognizer not present");
         }
 
+        //Assign url vale from Connect Activity
         url = getIntent().getStringExtra("URL");
 
+        //Functionality of all the buttons
         mapBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -82,8 +114,23 @@ public class MainActivity extends AppCompatActivity {
         tiltBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent toSensor = new Intent (getApplicationContext(), TiltActivity.class);
-                startActivity(toSensor);
+                if (tiltBtn.isChecked()){
+                    JSONObject json = ConnectActivity.getJSONObject("ACTION", "tiltOn");
+                    POST(json.toString(), "TIlt mode On");
+                    sensorManager.registerListener(MainActivity.this, accelerometer,
+                            SensorManager.SENSOR_DELAY_NORMAL);
+                    sensorManager.registerListener(MainActivity.this, magnetometer,
+                            SensorManager.SENSOR_DELAY_NORMAL);
+//                    PostTiltValue();
+                } else {
+                    JSONObject json = ConnectActivity.getJSONObject("ACTION", "tiltOff");
+                    POST(json.toString(), "TIlt mode Off");
+                    tvTilt.setText("Tilt: Mode Off");
+//                    if (tiltThread != null) {
+//                        tiltThread.interrupt();
+//                    }
+                    sensorManager.unregisterListener(MainActivity.this);
+                }
             }
         });
         sensorBtn.setOnClickListener(new View.OnClickListener() {
@@ -256,10 +303,12 @@ public class MainActivity extends AppCompatActivity {
         try {
             response = new PostResponseToServer().execute(myParams).get();
         } catch (Exception e) {e.printStackTrace();}
-        if (response != null) {
-            showAToast(message);
-        } else {
-            showAToast(message);
+        if (message != null) {
+            if (response != null) {
+                showAToast(message);
+            } else {
+                showAToast(message);
+            }
         }
     }
 
@@ -270,4 +319,93 @@ public class MainActivity extends AppCompatActivity {
         mToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
         mToast.show();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (tiltBtn.isChecked()){
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+//        if (tiltThread != null) {
+//            tiltThread.interrupt();
+//        }
+        sensorManager.unregisterListener(this);
+    }
+
+    private double degreesTilt(double degrees) {
+        // Tilted back towards user more than -30 deg
+        if (degrees < -30) {
+            degrees = -30;
+        }
+        // Tilted forward past 30 deg
+        else if (degrees > 30) {
+            degrees = 30;
+        }
+        return degrees;
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.values == null) {
+            return;
+        }
+        int sensorType = event.sensor.getType();
+        switch (sensorType) {
+            case Sensor.TYPE_ACCELEROMETER:
+                mGravity = event.values;
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                mGeomagnetic = event.values;
+                break;
+            default:
+                Log.d(TAG, "Unknown sensor type " + sensorType);
+                return;
+        }
+        if (mGravity == null) {
+            Log.d(TAG, "mGravity is null");
+            return;
+        }
+        if (mGeomagnetic == null) {
+            Log.d(TAG, "mGeomagnetic is null");
+            return;
+        }
+        float R[] = new float[9];
+        if (!SensorManager.getRotationMatrix(R, null, mGravity, mGeomagnetic)) {
+            Log.d(TAG, "getRotationMatrix() failed");
+            return;
+        }
+        float orientation[] = new float[9];
+        SensorManager.getOrientation(R, orientation);
+        float pitch = orientation[1];
+        //int pitchDeg = (int) degreesTilt((int) Math.round(Math.toDegrees(pitch)));
+        double pitchDeg = degreesTilt(Math.toDegrees(pitch));
+        tvTilt.setText("Tilt: " + String.valueOf(pitchDeg));
+        jsonTilt = ConnectActivity.getJSONObject("ACTION", "tiltValue");
+        try {
+            jsonTilt.put("ROLL", String.valueOf(pitchDeg));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        POST(jsonTilt.toString(), null);
+    }
+
+//    private void PostTiltValue(){
+//        tiltThread = new Thread(new Runnable() {
+//            public void run(){
+//                if (jsonTilt != null) {
+//                    POST(jsonTilt.toString(), null);
+//                }
+//            }
+//        });
+//        tiltThread.start();
+//    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 }

@@ -141,11 +141,12 @@
         android:textOff="TakeOff"
         android:textOn="Land" />
 
-    <Button
+    <ToggleButton
         android:id="@+id/btnTilt"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
-        android:text="Tilt"
+        android:textOff="Tilt On"
+        android:textOn="Tilt Off"
         android:layout_alignTop="@+id/btnSensor"
         android:layout_alignStart="@+id/tbtnArm" />
 
@@ -165,5 +166,13 @@
         android:layout_above="@+id/btnVideo"
         android:layout_alignStart="@+id/tbtnTakeOff"
         android:text="Sensor" />
+
+    <TextView
+        android:id="@+id/tvTilt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/btnSensor"
+        android:text="Tilt: Mode Off" />
 
 </RelativeLayout>
