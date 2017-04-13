@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
 
+"""droneserver.py: Handles incoming socket request and send command to FC using Mavlink."""
+
+__author__ = "Ricky Putra"
+__copyright__ = "Copyright 2017"
+
+__license__ = "GPL"
+__version__ = "1.0"
+__maintainer__ = "Ricky Putra"
+__email__ = "rhpmail@gmail.com"
+__status__ = "Development"
+
 import tornado.web
 import tornado.websocket
 import tornado.httpserver
@@ -7,8 +18,10 @@ import tornado.ioloop
 import json
 import ast
 import random
-
+from PixhawkCmd import PixhawkCmd
 from new_mission import createFile as createMissionFile
+
+pixcmd = None
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
@@ -85,6 +98,9 @@ class IndexPageHandler(tornado.web.RequestHandler):
                 reply = {"REPLY" : "Command received: " + voiceDict[data["ACTION"]]}
             elif data["ACTION"] == "tiltValue":
                 reply = {"REPLY" : "Command received: RollValue" + data["ROLL"]}
+            elif data["ACTION"] == "connect":
+                 pixcmd.connect('/dev/ttyAMA0', baud=57600, wait_ready=True)
+                 print "drone connected"
             else:
                 reply = {"REPLY" : "Command received: " + data["ACTION"]}
         else:
@@ -105,10 +121,10 @@ class Application(tornado.web.Application):
             'template_path': 'templates'
         }
         tornado.web.Application.__init__(self, handlers, **settings)
- 
- 
+                
 if __name__ == '__main__':
     port = 8080
+    pixcmd = PixhawkCmd()
     ws_app = Application()
     server = tornado.httpserver.HTTPServer(ws_app)
     server.listen(port)
