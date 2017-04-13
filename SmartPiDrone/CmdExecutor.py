@@ -67,10 +67,12 @@ class CmdExecutor:
         
     def arm():
         print "Arming motor.... \r\n\n"
-
+        self.pixhawkCmd.arm()
+        
     def disarm():
         print "Disarm motor.... \r\n\n"
-
+        self.pixhawkCmd.disarm()
+        
     def forward():
         print "Going forward.... \r\n\n"
 

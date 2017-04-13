@@ -123,7 +123,13 @@ class IndexPageHandler(tornado.web.RequestHandler):
                 reply = {"REPLY" : "Command received: RollValue" + data["ROLL"]}
             elif data["ACTION"] == "connect":
                 commandexecutor.connect()
-                reply = {"REPLY" : "Command received: Connect"}
+                reply = {"REPLY" : "Command received: connect"}
+            elif data["ACTION"] == "arm":
+                commandexecutor.arm()
+                reply = {"REPLY" : "Command received: arm"}
+            elif data["ACTION"] == "disarm":
+                commandexecutor.disarm()
+                reply = {"REPLY" : "Command received: disarm"}
             else:
                 #commandexecutor.setCmd(data["ACTION"])
                 reply = {"REPLY" : "Command received: " + data["ACTION"]}
