@@ -85,7 +85,7 @@ class IndexPageHandler(tornado.web.RequestHandler):
             gpsList = [gpsData1, gpsData2]
             reply = {"DRONE_GPS" : random.choice(gpsList)} 
         elif data["ACTION"] == "connect":
-            pixcmd.connect('udp:192.168.0.102:14549') 
+            pixcmd.connect('/dev/ttyAMA0', baud=57600, wait_ready=True)
             print "drone connected"
         else:
             reply = {"REPLY" : "Command received"}
