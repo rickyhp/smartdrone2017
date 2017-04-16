@@ -53,8 +53,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float[] mGravity;
     private float[] mGeomagnetic;
     static String url;
-    public JSONObject jsonTilt;
-//    private Thread tiltThread;
+    public static volatile JSONObject jsonTilt;
+    public static volatile boolean stopReq;
+    private Thread tiltThread;
     private static final int REQUEST_CODE = 1234;
 
     @Override
@@ -121,23 +122,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             SensorManager.SENSOR_DELAY_NORMAL);
                     sensorManager.registerListener(MainActivity.this, magnetometer,
                             SensorManager.SENSOR_DELAY_NORMAL);
-//                    PostTiltValue();
+                    stopReq = false;
+                    PostTiltValue();
                 } else {
                     JSONObject json = ConnectActivity.getJSONObject("ACTION", "tiltOff");
                     POST(json.toString(), "TIlt mode Off");
                     tvTilt.setText("Tilt: Mode Off");
-//                    if (tiltThread != null) {
-//                        tiltThread.interrupt();
-//                    }
                     sensorManager.unregisterListener(MainActivity.this);
+                    stopReq = true;
+                    if (tiltThread != null) {
+                        tiltThread.interrupt();
+                    }
                 }
             }
         });
         sensorBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent toSensor = new Intent (getApplicationContext(), TiltActivity.class);
-                startActivity(toSensor);
+//                Intent toSensor = new Intent (getApplicationContext(), SensorActivity.class);
+//                startActivity(toSensor);
             }
         });
         armToggleBtn.setOnClickListener(new View.OnClickListener(){
@@ -332,10 +335,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onPause() {
         super.onPause();
-//        if (tiltThread != null) {
-//            tiltThread.interrupt();
-//        }
         sensorManager.unregisterListener(this);
+        stopReq = true;
+        if (tiltThread != null) {
+            tiltThread.interrupt();
+        }
     }
 
     private double degreesTilt(double degrees) {
@@ -392,19 +396,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        POST(jsonTilt.toString(), null);
     }
 
-//    private void PostTiltValue(){
-//        tiltThread = new Thread(new Runnable() {
-//            public void run(){
-//                if (jsonTilt != null) {
-//                    POST(jsonTilt.toString(), null);
-//                }
-//            }
-//        });
-//        tiltThread.start();
-//    }
+    private void PostTiltValue(){
+        tiltThread = new Thread(new Runnable() {
+            public void run(){
+                while (true) {
+                    if (stopReq) return;
+                    if (jsonTilt != null) POST(jsonTilt.toString(), null);
+                }
+            }
+        });
+        tiltThread.start();
+    }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}

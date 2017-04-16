@@ -18,7 +18,7 @@ import tornado.ioloop
 import json
 import ast
 import random
-from PixhawkCmd import PixhawkCmd
+#from PixhawkCmd import PixhawkCmd
 from new_mission import createFile as createMissionFile
 
 pixcmd = None
@@ -99,7 +99,7 @@ class IndexPageHandler(tornado.web.RequestHandler):
             elif data["ACTION"] == "tiltValue":
                 reply = {"REPLY" : "Command received: RollValue" + data["ROLL"]}
             elif data["ACTION"] == "connect":
-                 pixcmd.connect('/dev/ttyAMA0', baud=57600, wait_ready=True)
+                 #pixcmd.connect('/dev/ttyAMA0', baud=57600, wait_ready=True)
                  print "drone connected"
             else:
                 reply = {"REPLY" : "Command received: " + data["ACTION"]}
@@ -124,7 +124,7 @@ class Application(tornado.web.Application):
                 
 if __name__ == '__main__':
     port = 8080
-    pixcmd = PixhawkCmd()
+    #pixcmd = PixhawkCmd()
     ws_app = Application()
     server = tornado.httpserver.HTTPServer(ws_app)
     server.listen(port)
