@@ -24,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -56,6 +57,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static volatile JSONObject jsonTilt;
     public static volatile boolean stopReq;
     private Thread tiltThread;
+    public static volatile double appliedAcceleration = 0;
+    public static volatile double currentAcceleration = 0;
+    public static volatile double velocity = 0;
+    Date lastUpdate;
     private static final int REQUEST_CODE = 1234;
 
     @Override
@@ -122,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             SensorManager.SENSOR_DELAY_NORMAL);
                     sensorManager.registerListener(MainActivity.this, magnetometer,
                             SensorManager.SENSOR_DELAY_NORMAL);
+                    lastUpdate = new Date(System.currentTimeMillis());
                     stopReq = false;
                     PostTiltValue();
                 } else {
@@ -384,18 +390,36 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             Log.d(TAG, "getRotationMatrix() failed");
             return;
         }
+
+        double x = event.values[0];
+        double y = event.values[1];
+        double z = event.values[2];
+
+        double a = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)) - 9.8;
+        Date timeNow = new Date(System.currentTimeMillis());
+        long timeDelta = timeNow.getTime()-lastUpdate.getTime();
+        lastUpdate.setTime(timeNow.getTime());
+        double deltaVelocity = appliedAcceleration*timeDelta/1000;
+        appliedAcceleration = (float) a;
+
         float orientation[] = new float[9];
         SensorManager.getOrientation(R, orientation);
         float pitch = orientation[1];
-        //int pitchDeg = (int) degreesTilt((int) Math.round(Math.toDegrees(pitch)));
         double pitchDeg = degreesTilt(Math.toDegrees(pitch));
+        if (pitchDeg < 0){
+            velocity -= deltaVelocity;
+        } else {
+            velocity += deltaVelocity;
+        }
         tvTilt.setText("Tilt: " + String.valueOf(pitchDeg));
         jsonTilt = ConnectActivity.getJSONObject("ACTION", "tiltValue");
         try {
             jsonTilt.put("ROLL", String.valueOf(pitchDeg));
+            jsonTilt.put("VELOCITY",String.valueOf(velocity));
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Log.v("JSONTILT", jsonTilt.toString());
     }
 
     private void PostTiltValue(){

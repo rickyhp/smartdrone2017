@@ -99,8 +99,9 @@ class IndexPageHandler(tornado.web.RequestHandler):
             elif data["ACTION"] == "tiltValue":
                 reply = {"REPLY" : "Command received: RollValue" + data["ROLL"]}
             elif data["ACTION"] == "connect":
-                 #pixcmd.connect('/dev/ttyAMA0', baud=57600, wait_ready=True)
-                 print "drone connected"
+                reply = {"REPLY" : "Command received: " + data["ACTION"]}
+                #pixcmd.connect('/dev/ttyAMA0', baud=57600, wait_ready=True)
+                print "drone connected"
             else:
                 reply = {"REPLY" : "Command received: " + data["ACTION"]}
         else:
