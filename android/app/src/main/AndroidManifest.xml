@@ -39,5 +39,11 @@
                 android:value="com.example.karthik.dronsample.MainActivity">
             </meta-data>
         </activity>
+        <activity android:name=".SensorActivity" android:screenOrientation="landscape"
+            android:parentActivityName=".MainActivity">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.karthik.dronsample.MainActivity">
+            </meta-data>
+        </activity>
     </application>
 </manifest>

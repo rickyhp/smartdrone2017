@@ -62,7 +62,7 @@ class IndexPageHandler(tornado.web.RequestHandler):
         data = {"ACTION": ""}
         commands = ['up', 'down', 'left', 'right', 'arm', 'disarm', 'video', 'picture',
                     'forward', 'reverse', 'connect', 'autoTakeoff', 'autoLand',
-                    'goWayPoint', 'getLocation', 'sensor', 'tiltOn', 'tiltOff', 'tiltValue',
+                    'goWayPoint', 'getLocation', 'getSensor', 'tiltOn', 'tiltOff', 'tiltValue',
                     'take off', 'land', 'tilt on', 'tilt off', 'rollLeft', 'rollRight',
                     'roll left', 'roll right']
         if self.request.body:
@@ -86,13 +86,15 @@ class IndexPageHandler(tornado.web.RequestHandler):
                             "datetime": "2017-20-22 22:32:32"}
                 gpsList = [gpsData1, gpsData2]
                 reply = {"DRONE_GPS" : random.choice(gpsList)}
-            elif data["ACTION"] == "sensor":
+            elif data["ACTION"] == "getSensor":
                 sensor1 = {"sonar-1": "50.9138436873", "sonar-2": "51.3761760834" , "sonar-3": "155.490976816",
                            "sonar-4": "32.89898989", "temperature": "30.764623",
                            "humidity": "65.33862786"}
                 sensor2 = {"sonar-1": "100.9138436873", "sonar-2": "151.3761760834" , "sonar-3": "145.490976816",
                            "sonar-4": "35.89898989", "temperature": "32.92837826876",
                            "humidity": "34.656726326"}
+                sensorList = [sensor1, sensor2]
+                reply = {"SENSOR" : random.choice(sensorList)}
             elif data["ACTION"] == "take off" or data["ACTION"] == "land" or data["ACTION"] == "roll left" or data["ACTION"] == "roll right":
                 voiceDict = {"take off":"autoTakeoff", "land":"autoLand", "roll left":"rollLeft", "roll right":"rollRight"}
                 reply = {"REPLY" : "Command received: " + voiceDict[data["ACTION"]]}

@@ -9,6 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,8 +27,10 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener,
+        TextToSpeech.OnInitListener {
     ToggleButton armToggleBtn;
     Button mapBtn;
     Button micBtn;
@@ -58,10 +61,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static volatile boolean stopReq;
     private Thread tiltThread;
     public static volatile double appliedAcceleration = 0;
-    public static volatile double currentAcceleration = 0;
     public static volatile double velocity = 0;
     Date lastUpdate;
     private static final int REQUEST_CODE = 1234;
+    TextToSpeech tts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorBtn = (Button) findViewById(R.id.btnSensor);
         returnHomeBtn = (Button) findViewById(R.id.btnReturnHome);
         tvTilt = (TextView) findViewById(R.id.tvTilt);
+        tts = new TextToSpeech(MainActivity.this, MainActivity.this);
 
         // Keep the screen on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -145,8 +149,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent toSensor = new Intent (getApplicationContext(), SensorActivity.class);
-//                startActivity(toSensor);
+                Intent toSensor = new Intent (getApplicationContext(), SensorActivity.class);
+                startActivity(toSensor);
             }
         });
         armToggleBtn.setOnClickListener(new View.OnClickListener(){
@@ -277,6 +281,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
     }
 
+    @Override
+    public void onInit(int Text2SpeechCurrentStatus) {
+        if (Text2SpeechCurrentStatus == TextToSpeech.SUCCESS) {
+            tts.setLanguage(Locale.US);
+        }
+    }
+
+    public void textToSpeech(String text) {
+        Log.d("TEXTSPEECH", text);
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+    }
+
     public void micButtonClicked(View v){
         startVoiceRecognitionActivity();
     }
@@ -298,10 +314,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             ArrayList<String> matches = data.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
             String word = matches.get(0);
-            Toast.makeText(getBaseContext(), word, Toast.LENGTH_SHORT).show();
+            showAToast(word);
             JSONObject json = ConnectActivity.getJSONObject("ACTION", word);
-            String message = "Sending voice command";
-            POST(json.toString(), message);
+            POST(json.toString(), null);
        }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -325,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (mToast != null) {
             mToast.cancel();
         }
+        textToSpeech(message);
         mToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
         mToast.show();
     }
@@ -346,6 +362,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (tiltThread != null) {
             tiltThread.interrupt();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+        }
+        super.onDestroy();
     }
 
     private double degreesTilt(double degrees) {
