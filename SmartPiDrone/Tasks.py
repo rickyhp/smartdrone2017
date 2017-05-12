@@ -16,6 +16,8 @@ from DroneData import *
 from CmdExecutor import *
 
 
+obstacle_allowance = 25#Set 25 cm allowance for object
+
 def DummyThread(param):
     while 1:
         print("Dummy Thread running....\r\n")
@@ -27,42 +29,102 @@ def MavLinkSerialCommThread(commdata):
         time.sleep(1)
 
 
-def performOperationThread(commandexecutor):
+def performOperationThread(commandexecutor, dronedata):
     while 1:
-        print("Executing command on drone....\r\n")
+        #print("Executing command on drone....\r\n")
         print "Command : " , commandexecutor.cmd
-        commandexecutor.executeCmd()
+
+        # Obstacle Detection #
+        if  dronedata.getSonar1_ObsDistance() <= obstacle_allowance:
+                print ("Obstacle  at %s cm on the left!!! "%dronedata.getSonar1_ObsDistance())
+                
+        if  dronedata.getSonar2_ObsDistance() <= obstacle_allowance:
+                print ("Obstacle  at %s cm on the right!!! "%dronedata.getSonar2_ObsDistance())
+                
+        if  dronedata.getSonar3_ObsDistance() <= obstacle_allowance:
+                print ("Obstacle  at %s cm above!!! "%dronedata.getSonar3_ObsDistance())
+                
+        if  dronedata.getSonar4_ObsDistance() <= obstacle_allowance:
+                print ("Obstacle  at %s cm underneath!!! "%dronedata.getSonar4_ObsDistance())
+
+        #####################################
+        if ((commandexecutor.cmd == "left") or (commandexecutor.cmd == "rollLeft") or (commandexecutor.cmd == "rotateLeft")):
+            if  dronedata.getSonar1_ObsDistance() <= obstacle_allowance:             
+                print ("Obstacle  at %s cm on the left!"%dronedata.getSonar1_ObsDistance())
+                print ("%s cmd disabled!" %commandexecutor.cmd)
+                commandexecutor.cmd = 'doNothing'#Command disabled
+            else:
+                print "No Obstacle on the left"
+
+        elif ((commandexecutor.cmd == "right") or (commandexecutor.cmd == "rollRight") or (commandexecutor.cmd == "rotateRight")):
+            if  dronedata.getSonar2_ObsDistance() <= obstacle_allowance:
+                print ("Obstacle  at %s cm on the right! Right cmd disabled!"%dronedata.getSonar2_ObsDistance())
+                print ("%s cmd disabled!" %commandexecutor.cmd)
+                commandexecutor.cmd = 'doNothing'#Command disabled
+            else:
+                print "No Obstacle on the right"
+
+        elif ((commandexecutor.cmd == "up") or (commandexecutor.cmd == "takeoff")):
+            if  dronedata.getSonar3_ObsDistance() <= obstacle_allowance:
+                print ("Obstacle  at %s cm above! Up cmd disabled!"%dronedata.getSonar3_ObsDistance())
+                print ("%s cmd disabled!" %commandexecutor.cmd)
+                commandexecutor.cmd = 'doNothing'#Command disabled
+            else:
+                print "No Obstacle above"
+
+        elif commandexecutor.cmd == "down":
+            if  dronedata.getSonar4_ObsDistance() <= obstacle_allowance:
+                print ("Obstacle  at %s cm underneath! Down cmd disabled!"%dronedata.getSonar4_ObsDistance())
+                print ("%s cmd disabled!" %commandexecutor.cmd)
+                commandexecutor.cmd = 'doNothing'#Command disabled
+            else:
+                print "No Obstacle underneath"
+            
+        else:
+            print "Other Cmd"
+            
+        #####################################           
+        commandexecutor.executeCmd()#Execute command here
         commandexecutor.cmd = 'doNothing'#Reset to default
         time.sleep(0.2)
+        #####################################
 
 
-def Sonar1Thread(sonar_object):
+def Sonar1Thread(sonar_object,dronedata):
     while 1:
         global cycle
         #print("Getting ultrasonic sensor-1  data....\r\n")
-        print("Sonar-1 :  %s cm\r\n" %sonar_object.raw_distance(sample_size=7,sample_wait=0.1))
-        time.sleep(0.1)
+        sonar_object.object_distance = sonar_object.raw_distance(sample_size=7,sample_wait=0.1)
+        dronedata.setSonar1_ObsDistance(sonar_object.object_distance) 
+        print("Sonar-1 :  %s cm\r\n" %sonar_object.object_distance)
+        time.sleep(0.2)
 
-def Sonar2Thread(sonar_object):
+def Sonar2Thread(sonar_object,dronedata):
     while 1:
         global cycle
         #print("Getting ultrasonic sensor-2  data....\r\n")
-        print("Sonar-2 :  %s cm\r\n" %sonar_object.raw_distance(sample_size=7,sample_wait=0.1))
-        time.sleep(0.1)
+        sonar_object.object_distance = sonar_object.raw_distance(sample_size=7,sample_wait=0.1)
+        dronedata.setSonar2_ObsDistance(sonar_object.object_distance)
+        print("Sonar-2 :  %s cm\r\n" %sonar_object.object_distance)
+        time.sleep(0.2)
 
-def Sonar3Thread(sonar_object):
+def Sonar3Thread(sonar_object,dronedata):
     while 1:
         global cycle
         #print("Getting ultrasonic sensor-3  data....\r\n")
-        print("Sonar-3 :  %s cm\r\n" %sonar_object.raw_distance(sample_size=7,sample_wait=0.1))
-        time.sleep(0.1)
+        sonar_object.object_distance = sonar_object.raw_distance(sample_size=7,sample_wait=0.1)
+        dronedata.setSonar3_ObsDistance(sonar_object.object_distance)
+        print("Sonar-3 :  %s cm\r\n" %sonar_object.object_distance)
+        time.sleep(0.2)
 
-def Sonar4Thread(sonar_object):
+def Sonar4Thread(sonar_object,dronedata):
     while 1:
         global cycle
         #print("Getting ultrasonic sensor-4  data....\r\n")
-        print("Sonar-4 :  %s cm\r\n" %sonar_object.raw_distance(sample_size=7,sample_wait=0.1))
-        time.sleep(0.1)
+        sonar_object.object_distance = sonar_object.raw_distance(sample_size=7,sample_wait=0.1)
+        dronedata.setSonar4_ObsDistance(sonar_object.object_distance)
+        print("Sonar-4 :  %s cm\r\n" %sonar_object.object_distance)
+        time.sleep(0.2)
 
 def HumidityAM2302Thread(hud_sensor):
     while 1:

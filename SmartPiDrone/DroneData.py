@@ -40,10 +40,10 @@ class DroneData:
         self.altitude = 0
         self.latitude = 0
         self.longitude = 0
-        self.sonar1_objdis = UltrasonicSensor(4,17)
-        self.sonar2_objdis = UltrasonicSensor(23,24)
-        self.sonar3_objdis = UltrasonicSensor(27,22)
-        self.sonar4_objdis = UltrasonicSensor(12,16)
+        self.sonar1_objdis = 0
+        self.sonar2_objdis = 0
+        self.sonar3_objdis = 0
+        self.sonar4_objdis = 0
         self.HudTempSensor = Adafruit_DHT.AM2302
 
 
@@ -75,19 +75,30 @@ class DroneData:
     def getLocation(self):
         return [(self.latitude,self.longitude)]
 
-    def getSonar1_ObsDistance():
-        return self.sonar1_objdis.raw_distance(sample_size=7,sample_wait=0.1)
+    def getSonar1_ObsDistance(self):
+        return self.sonar1_objdis
 
-    def getSonar2_ObsDistance():
-        return self.sonar2_objdis.raw_distance(sample_size=7,sample_wait=0.1)
-
-
-    def getSonar3_ObsDistance():
-        return self.sonar3_objdis.raw_distance(sample_size=7,sample_wait=0.1)
+    def setSonar1_ObsDistance(self,objdis):
+        self.sonar1_objdis = objdis
 
 
-    def getSonar4_ObsDistance():
-        return self.sonar4_objdis.raw_distance(sample_size=7,sample_wait=0.1)
+    def getSonar2_ObsDistance(self):
+        return self.sonar2_objdis
+
+    def setSonar2_ObsDistance(self,objdis):
+        self.sonar2_objdis = objdis
 
 
+    def getSonar3_ObsDistance(self):
+        return self.sonar3_objdis
+
+    def setSonar3_ObsDistance(self,objdis):
+        self.sonar3_objdis = objdis
+
+
+    def getSonar4_ObsDistance(self):
+        return self.sonar4_objdis
+
+    def setSonar4_ObsDistance(self,objdis):
+        self.sonar4_objdis = objdis
         

@@ -74,13 +74,14 @@ def main():
         try:
 
             thread.start_new_thread(SocketServeContinuousThread, (webserver, dronedata, timestamp ,commandexecutor, 2, ))
-            thread.start_new_thread(performOperationThread, (commandexecutor, )) 
+            thread.start_new_thread(performOperationThread, (commandexecutor, dronedata, )) 
 
-            thread.start_new_thread(HumidityAM2302Thread, (HudTempSensor, )) 
-            thread.start_new_thread(Sonar1Thread, (sonar1, ))
-            thread.start_new_thread(Sonar2Thread, (sonar2, ))
-            thread.start_new_thread(Sonar3Thread, (sonar3, ))
-            thread.start_new_thread(Sonar4Thread, (sonar4, ))
+            #thread.start_new_thread(HumidityAM2302Thread, (HudTempSensor, )) 
+            thread.start_new_thread(Sonar1Thread, (sonar1,dronedata, ))
+            thread.start_new_thread(Sonar2Thread, (sonar2,dronedata, ))
+            thread.start_new_thread(Sonar3Thread, (sonar3,dronedata, ))
+            thread.start_new_thread(Sonar4Thread, (sonar4,dronedata, ))
+
             #thread.start_new_thread(GetAllSensorDataThread, (sonar1,sonar2,sonar3,sonar4,HudTempSensor, ))       
             #thread.start_new_thread(SocketServerThread, (webserver, dronedata, timestamp ,5, ))
             #thread.start_new_thread(MavLinkSerialCommThread, (mavlinkdata, ))

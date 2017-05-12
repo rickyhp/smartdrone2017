@@ -17,6 +17,9 @@ class UltrasonicSensor(object):
     unit='imperial'
     temperature=<Desired temperature in Fahrenheit>
     '''
+    
+    global sonar_signal_off ,sonar_signal_on #Added
+    global object_distance#Added
 
     def __init__(self,
                  trig_pin,
@@ -65,6 +68,7 @@ class UltrasonicSensor(object):
             raise ValueError(
                 'Wrong Unit Type. Unit Must be imperial or metric')
 
+
         speed_of_sound = 331.3 * math.sqrt(1+(self.temperature / 273.15))
         sample = []
         # setup input/output pins
@@ -80,18 +84,30 @@ class UltrasonicSensor(object):
             time.sleep(0.00001)
             GPIO.output(self.trig_pin, False)
             echo_status_counter = 1
+
+            sonar_signal_off =  time.time()#Added as dummy to avoid unboundLocal error
+            
             while GPIO.input(self.echo_pin) == 0:
                 if echo_status_counter < 1000:
                     sonar_signal_off = time.time()
                     echo_status_counter += 1
                 else:
-                    raise SystemError('Echo pulse was not received')
+                    #raise SystemError('Echo pulse was not received')
+                    print"Invalid :Echo pulse not received!"
+                    sonar_signal_on = time.time()#Added
+                    GPIO.output(self.trig_pin, GPIO.HIGH)#Added
+                    time.sleep(0.00001)#added
+                    GPIO.output(self.trig_pin, GPIO.LOW)#Added
+                    
             while GPIO.input(self.echo_pin) == 1:
                 sonar_signal_on = time.time()
+                
             time_passed = sonar_signal_on - sonar_signal_off
             distance_cm = time_passed * ((speed_of_sound * 100) / 2)
             sample.append(distance_cm)
+            
         sorted_sample = sorted(sample)
+        self.object_distance = sorted_sample[sample_size // 2]#Added
         # Only cleanup the pins used to prevent clobbering
         # any others in use by the program
         GPIO.cleanup((self.trig_pin, self.echo_pin))
