@@ -1,31 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="180dp">
+        android:layout_height="wrap_content"
+        android:paddingEnd="130dp"
+        android:paddingStart="130dp">
 
         <TextView
             android:id="@+id/tv_SmartDrone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:text="SMART DRONE"
-            android:textSize="30dp"/>
+            android:layout_marginTop="30dp"
+            android:text="@string/app_name"
+            android:textSize="30sp" />
 
         <TextView
             android:id="@+id/tv_IPAddress"
-            android:layout_width="match_parent"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/tv_SmartDrone"
             android:layout_marginTop="20dp"
-            android:textSize="20dp"
-            android:text="IP Address  to connect to Drone" />
+            android:text="@string/ipText"
+            android:textSize="20sp" />
 
         <AutoCompleteTextView
             android:id="@+id/ipAddress"
@@ -35,19 +36,19 @@
             android:layout_below="@+id/tv_IPAddress"
             android:layout_marginTop="10dp"
             android:digits="0123456789."
-            android:hint="Eg:192.168.43.53"
+            android:hint="@string/ipTextHint"
             android:inputType="text"
-            android:text="192.168.43.148" />
+            android:text="@string/ipTextVal" />
 
         <TextView
             android:id="@+id/tv_PortNumber"
-            android:layout_width="match_parent"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/ipAddress"
-            android:textSize="20dp"
             android:layout_marginTop="20dp"
-            android:text="Port number to connect to Drone" />
+            android:text="@string/portText"
+            android:textSize="20sp" />
 
         <AutoCompleteTextView
             android:id="@+id/port"
@@ -57,9 +58,9 @@
             android:layout_below="@+id/tv_PortNumber"
             android:layout_marginTop="10dp"
             android:ems="10"
-            android:hint="Eg: 8080"
+            android:hint="@string/portTextHint"
             android:inputType="number"
-            android:text="8080" />
+            android:text="@string/portTextVal" />
 
         <Button
             android:id="@+id/btnConnect"
@@ -68,9 +69,8 @@
             android:layout_alignParentBottom="true"
             android:layout_below="@+id/port"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="50dp"
+            android:layout_marginBottom="30dp"
             android:focusable="false"
-            android:text="Connect" />
-
+            android:text="@string/connect" />
     </RelativeLayout>
 </ScrollView>

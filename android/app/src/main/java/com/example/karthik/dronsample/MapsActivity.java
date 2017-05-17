@@ -66,6 +66,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Button submitBtn;
     Marker marker;
     HashMap<String, String> droneData;
+    private static final String TAG = "MapActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +117,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 json.put("DRONE_MARKERS_ALT", droneData.get("ALTITUDE"));
                                 json.put("DRONE_RELATIVE_ALT", getRelativeAltArray(altitudeArray));
                             } catch (Exception e) {
-                                Log.v("EXCEPTION_LOG", e.toString());
+                                Log.v(TAG, e.toString());
                                 e.printStackTrace();
                             }
                             String message = "Coordinates sent";
@@ -126,7 +127,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     });
                     dialog.show();
                 } else {
-                    Toast.makeText(MapsActivity.this, "Atleast one location needed",
+                    Toast.makeText(MapsActivity.this, "Minimum one location needed",
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -156,7 +157,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     polyline.remove();
                                 }
                                 droneData = gpsData;
-                                Log.d("GPSDATA", droneData.toString());
                                 marker = mMap.addMarker(markerOptions);
                                 drawPolyLineDroneMarker(location);
                             }
@@ -192,13 +192,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             gpsData.put("LONGITUDE", longitude);
             gpsData.put("HUMIDITY", humidity);
             gpsData.put("TEMPERATURE", temperature);
-            //        gpsData.put("LATITUDE", "1.2897150957619739");
-//        gpsData.put("LONGITUDE", "103.77706065773963");
-//        gpsData.put("HUMIDITY", "79.09999");
-//        gpsData.put("TEMPERATURE", "30.39999996185");
         } catch (Exception e){
             e.printStackTrace();
-            Log.d("EXCEPTION_LOG", e.toString());
+            Log.d(TAG, e.toString());
         }
         return gpsData;
     }
@@ -214,7 +210,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION)
@@ -227,7 +222,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
         }
-
         markerPoints = new ArrayList<>();
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -274,7 +268,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             builder.include(latLng);
         }
         final LatLngBounds bounds = builder.build();
-        //BOUND_PADDING is an int to specify padding of bound.. try 100.
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 100);
         mMap.animateCamera(cu);
     }
@@ -310,17 +303,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (mCurrLocationMarker != null) {
             mCurrLocationMarker.remove();
         }
-        //Place current location marker
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         markerOptions.title("Current Position");
-        //markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-        //mCurrLocationMarker = mMap.addMarker(markerOptions);
-        //move map camera
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(21));
-        //stop location updates
         if (mGoogleApiClient != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
@@ -366,7 +354,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         mMap.setMyLocationEnabled(true);
                     }
                 } else {
-                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Permission Denied", Toast.LENGTH_LONG).show();
                 }
             }
         }
@@ -387,14 +375,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         return response;
     }
-
-//    private String getAbsoluteAltArray(ArrayList<LatLng> markers) throws Exception {
-//        JSONArray altitudeArray = new JSONArray();
-//        for (LatLng latLong : markers){
-//            altitudeArray.put(getAltitude(latLong));
-//        }
-//        return altitudeArray.toString();
-//    }
 
     private String getRelativeAltArray(ArrayList<String> arrayList) throws Exception{
         JSONArray relativeAltArray = new JSONArray();
@@ -419,7 +399,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ArrayList<String> getDroneMarkerArray() throws Exception{
         ArrayList<String> droneMarkerArray = new ArrayList<>();
         LatLng droneLoc = stringToLatLong(getDroneLocation());
-//        LatLng droneLoc = new LatLng(1.2897150957619739, 103.77706065773963);
         droneMarkerArray.add(getLatLngTupleString(droneLoc));
         droneMarkerArray.add(getLatLngTupleString(droneLoc));
         for (LatLng latLng:markerPoints){
@@ -427,18 +406,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         return droneMarkerArray;
     }
-
-//    private ArrayList<LatLng> getDroneLatLngArray() throws Exception {
-//        ArrayList<LatLng> droneLatLngArray = new ArrayList<>();
-//        LatLng droneLoc = stringToLatLong(getDroneLocation());
-////        LatLng droneLoc = new LatLng(1.2897150957619739, 103.77706065773963);
-//        droneLatLngArray.add(droneLoc);
-//        droneLatLngArray.add(droneLoc);
-//        for (LatLng latLng:markerPoints){
-//            droneLatLngArray.add(latLng);
-//        }
-//        return droneLatLngArray;
-//    }
 
     private String getLatLngTupleString(LatLng latLng){
         String result;

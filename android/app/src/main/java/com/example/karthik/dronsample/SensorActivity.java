@@ -21,6 +21,7 @@ public class SensorActivity extends AppCompatActivity{
     TextView sensor2;
     TextView sensor3;
     TextView sensor4;
+    private static final String TAG = "SensorActivity";
     ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     @Override
@@ -42,7 +43,7 @@ public class SensorActivity extends AppCompatActivity{
                 @Override
                 public void run() {
                     final HashMap<String, String> sensorData = getDroneSensorData();
-                    runOnUiThread(new Runnable() {
+                    SensorActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             sensor1.setText(sensorData.get("SENSOR1"));
@@ -75,7 +76,7 @@ public class SensorActivity extends AppCompatActivity{
             sensorData.put("TEMPERATURE", sensor.getString("temperature"));
         } catch (Exception e){
             e.printStackTrace();
-            Log.d("EXCEPTION_LOG", e.toString());
+            Log.d(TAG, e.toString());
         }
         return sensorData;
     }

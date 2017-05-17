@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+ #!/usr/bin/env python3
 
 """droneserver.py: Handles incoming socket request and send command to FC using Mavlink."""
 
@@ -99,7 +99,7 @@ class IndexPageHandler(tornado.web.RequestHandler):
                 voiceDict = {"take off":"autoTakeoff", "land":"autoLand", "roll left":"rollLeft", "roll right":"rollRight"}
                 reply = {"REPLY" : "Command received: " + voiceDict[data["ACTION"]]}
             elif data["ACTION"] == "tiltValue":
-                reply = {"REPLY" : "Command received: RollValue" + data["ROLL"]}
+                reply = {"REPLY" : "Command received"}
             elif data["ACTION"] == "connect":
                 reply = {"REPLY" : "Command received: " + data["ACTION"]}
                 #pixcmd.connect('/dev/ttyAMA0', baud=57600, wait_ready=True)

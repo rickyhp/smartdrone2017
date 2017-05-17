@@ -1,5 +1,6 @@
 package com.example.karthik.dronsample;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,11 +13,16 @@ import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -29,42 +35,29 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static com.example.karthik.dronsample.R.id.linearLayoutEdit;
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener,
         TextToSpeech.OnInitListener {
-    ToggleButton armToggleBtn;
-    Button mapBtn;
-    Button micBtn;
-    Button videoBtn;
-    Button upBtn;
-    Button downBtn;
-    Button rollLeftBtn;
-    Button rollRightBtn;
-    Button forwardBtn;
-    Button reverseBtn;
-    Button leftBtn;
-    Button rightBtn;
-    Button pictureBtn;
-    ToggleButton tiltBtn;
-    Button returnHomeBtn;
-    Button sensorBtn;
-    ToggleButton takeOffToggleBtn;
-    Toast mToast;
-    TextView tvTilt;
+    private ToggleButton armToggleBtn, takeOffToggleBtn;
+    private Toast mToast;
+    private TextView tvTilt;
+    private TextToSpeech tts;
+    private volatile JSONObject jsonTilt;
     private static final String TAG = "MainActivity";
     private SensorManager sensorManager;
-    private Sensor accelerometer;
-    private Sensor magnetometer;
-    private float[] mGravity;
-    private float[] mGeomagnetic;
-    static String url;
-    public static volatile JSONObject jsonTilt;
-    public static volatile boolean stopReq;
+    private Sensor accelerometer, magnetometer;
+    private float[] mGravity, mGeomagnetic;
     private Thread tiltThread;
-    public static volatile double appliedAcceleration = 0;
-    public static volatile double velocity = 0;
-    Date lastUpdate;
+    private Date lastUpdate;
+    private double appliedAcceleration, velocity, avgVelocity;
+    private ArrayList<Double> velocityList;
+    private int count = 0;
+    private static volatile boolean stopReq;
     private static final int REQUEST_CODE = 1234;
-    TextToSpeech tts;
+    private String item = "Stabilize";
+    private String previousItem = "Stabilize";
+    public static String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,23 +65,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
 
         //Initialize all the variables
+        Button mapBtn = (Button) findViewById(R.id.btnMap);
+        Button micBtn = (Button) findViewById(R.id.btnMic);
+        Button videoBtn = (Button) findViewById(R.id.btnVideo);
+        Button upBtn = (Button) findViewById(R.id.btnUp);
+        Button downBtn = (Button) findViewById(R.id.btnDown);
+        Button rollLeftBtn = (Button) findViewById(R.id.btnRollLeft);
+        Button rollRightBtn = (Button) findViewById(R.id.btnRollRight);
+        Button forwardBtn = (Button) findViewById(R.id.btnForward);
+        Button reverseBtn = (Button) findViewById(R.id.btnReverse);
+        Button leftBtn = (Button) findViewById(R.id.btnLeft);
+        Button rightBtn = (Button) findViewById(R.id.btnRight);
+        Button pictureBtn = (Button) findViewById(R.id.btnPicture);
+        Button sensorBtn = (Button) findViewById(R.id.btnSensor);
+        Button returnHomeBtn = (Button) findViewById(R.id.btnReturnHome);
+        Spinner flightModes = (Spinner) findViewById(R.id.flightModes);
         armToggleBtn = (ToggleButton) findViewById(R.id.tbtnArm);
-        mapBtn = (Button) findViewById(R.id.btnMap);
-        micBtn = (Button) findViewById(R.id.btnMic);
-        videoBtn = (Button) findViewById(R.id.btnVideo);
-        upBtn = (Button) findViewById(R.id.btnUp);
-        downBtn = (Button) findViewById(R.id.btnDown);
-        rollLeftBtn = (Button) findViewById(R.id.btnRollLeft);
-        rollRightBtn = (Button) findViewById(R.id.btnRollRight);
-        forwardBtn = (Button) findViewById(R.id.btnForward);
-        reverseBtn = (Button) findViewById(R.id.btnReverse);
-        leftBtn = (Button) findViewById(R.id.btnLeft);
-        rightBtn = (Button) findViewById(R.id.btnRight);
-        pictureBtn = (Button) findViewById(R.id.btnPicture);
         takeOffToggleBtn = (ToggleButton) findViewById(R.id.tbtnTakeOff);
-        tiltBtn = (ToggleButton) findViewById(R.id.btnTilt);
-        sensorBtn = (Button) findViewById(R.id.btnSensor);
-        returnHomeBtn = (Button) findViewById(R.id.btnReturnHome);
         tvTilt = (TextView) findViewById(R.id.tvTilt);
         tts = new TextToSpeech(MainActivity.this, MainActivity.this);
 
@@ -104,39 +97,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         PackageManager pm = getPackageManager();
         List<ResolveInfo> activities = pm.queryIntentActivities(
                 new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
-        if (activities.size() == 0)
-        {
+        if (activities.size() == 0) {
             micBtn.setEnabled(false);
             micBtn.setText("Recognizer not present");
         }
 
-        //Assign url vale from Connect Activity
+        //Assign url value from Connect Activity
         url = getIntent().getStringExtra("URL");
 
         //Functionality of all the buttons
-        mapBtn.setOnClickListener(new View.OnClickListener(){
+        mapBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
-                Intent toMap = new Intent (getApplicationContext(), MapsActivity.class);
+            public void onClick(View v) {
+                Intent toMap = new Intent(getApplicationContext(), MapsActivity.class);
                 startActivity(toMap);
             }
         });
-        tiltBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (tiltBtn.isChecked()){
-                    JSONObject json = ConnectActivity.getJSONObject("ACTION", "tiltOn");
-                    POST(json.toString(), "TIlt mode On");
-                    sensorManager.registerListener(MainActivity.this, accelerometer,
-                            SensorManager.SENSOR_DELAY_NORMAL);
-                    sensorManager.registerListener(MainActivity.this, magnetometer,
-                            SensorManager.SENSOR_DELAY_NORMAL);
-                    lastUpdate = new Date(System.currentTimeMillis());
-                    stopReq = false;
-                    PostTiltValue();
-                } else {
+        flightModes.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                item = parent.getItemAtPosition(pos).toString();
+                if (previousItem.equals("Co-operative") && !item.equals("Co-operative")) {
                     JSONObject json = ConnectActivity.getJSONObject("ACTION", "tiltOff");
-                    POST(json.toString(), "TIlt mode Off");
+                    POST(json.toString(), "Co-operative control Off");
                     tvTilt.setText("Tilt: Mode Off");
                     sensorManager.unregisterListener(MainActivity.this);
                     stopReq = true;
@@ -144,20 +127,85 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         tiltThread.interrupt();
                     }
                 }
+                previousItem = item;
+                switch (item) {
+                    case "Co-operative": {
+                        JSONObject json = ConnectActivity.getJSONObject("ACTION", "tiltOn");
+                        POST(json.toString(), "Co-operative control on");
+                        sensorManager.registerListener(MainActivity.this, accelerometer,
+                                SensorManager.SENSOR_DELAY_NORMAL);
+                        sensorManager.registerListener(MainActivity.this, magnetometer,
+                                SensorManager.SENSOR_DELAY_NORMAL);
+                        lastUpdate = new Date(System.currentTimeMillis());
+                        appliedAcceleration = 0;
+                        velocity = 0;
+                        avgVelocity = 0;
+                        count = 0;
+                        stopReq = false;
+                        velocityList = new ArrayList<>();
+                        PostTiltValue();
+                        break;
+                    }
+                    case "3D Scan":
+                        final Dialog dialog = new Dialog(MainActivity.this);
+                        dialog.setContentView(R.layout.scan_mode_popup);
+                        LinearLayout linearLayout =
+                                (LinearLayout) dialog.findViewById(linearLayoutEdit);
+                        final ArrayList<EditText> editTextArray = new ArrayList<>();
+                        for (int i = 0; i < 2; i++) {
+                            EditText editText = new EditText(MainActivity.this);
+                            if (i == 0) {
+                                editText.setHint("Radius");
+                            } else {
+                                editText.setHint("Altitude");
+                            }
+                            editTextArray.add(editText);
+                            editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                            linearLayout.addView(editText);
+                        }
+                        Button dialogButton = (Button) dialog.findViewById(R.id.btn_ok);
+                        dialogButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                JSONObject json = ConnectActivity.getJSONObject("ACTION", "3D Scan");
+                                try {
+                                    json.put("RADIUS", editTextArray.get(0).getText().toString());
+                                    json.put("ALTITUDE", editTextArray.get(1).getText().toString());
+                                } catch (Exception e) {
+                                    Log.v(TAG, e.toString());
+                                    e.printStackTrace();
+                                }
+                                String message = "3D scan mode on";
+                                POST(json.toString(), message);
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.show();
+                        break;
+                    default: {
+                        JSONObject json = ConnectActivity.getJSONObject("ACTION", item);
+                        POST(json.toString(), item);
+                        break;
+                    }
+                }
+            }
+
+            public void onNothingSelected(AdapterView<?> parent) {
             }
         });
         sensorBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent toSensor = new Intent (getApplicationContext(), SensorActivity.class);
+                Intent toSensor = new Intent(getApplicationContext(), SensorActivity.class);
                 startActivity(toSensor);
             }
         });
-        armToggleBtn.setOnClickListener(new View.OnClickListener(){
+        armToggleBtn.setOnClickListener(new View.OnClickListener() {
             JSONObject json;
             String message;
+
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
                 if (armToggleBtn.isChecked()) {
                     json = ConnectActivity.getJSONObject("ACTION", "arm");
                     message = "Drone Armed";
@@ -168,24 +216,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 POST(json.toString(), message);
             }
         });
-        takeOffToggleBtn.setOnClickListener(new View.OnClickListener(){
-                JSONObject json;
-                String message;
-                @Override
-                public void onClick(View v){
-                    if (takeOffToggleBtn.isChecked()) {
-                        json = ConnectActivity.getJSONObject("ACTION", "autoTakeoff");
-                        message = "Auto Take Off initiated";
-                    } else {
-                        json = ConnectActivity.getJSONObject("ACTION", "autoLand");
-                        message = "Auto Landing initiated";
-                    }
-                    POST(json.toString(), message);
+        takeOffToggleBtn.setOnClickListener(new View.OnClickListener() {
+            JSONObject json;
+            String message;
+
+            @Override
+            public void onClick(View v) {
+                if (takeOffToggleBtn.isChecked()) {
+                    json = ConnectActivity.getJSONObject("ACTION", "autoTakeoff");
+                    message = "Auto Take Off initiated";
+                } else {
+                    json = ConnectActivity.getJSONObject("ACTION", "autoLand");
+                    message = "Auto Landing initiated";
                 }
-            });
+                POST(json.toString(), message);
+            }
+        });
         upBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "up");
-            String message = "Drone move up";
+            String message = "Move Up";
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 POST(json.toString(), message);
@@ -194,7 +244,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
         downBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "down");
-            String message = "Drone move down";
+            String message = "Move Down";
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 POST(json.toString(), message);
@@ -203,7 +254,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
         forwardBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "forward");
-            String message = "Drone move forward";
+            String message = "Move Forward";
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 POST(json.toString(), message);
@@ -212,7 +264,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
         reverseBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "reverse");
-            String message = "Drone move reverse";
+            String message = "Move Reverse";
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 POST(json.toString(), message);
@@ -222,6 +275,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         leftBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "left");
             String message = "Drone turn Left";
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 POST(json.toString(), message);
@@ -230,7 +284,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
         rightBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "right");
-            String message = "Drone turn Right";
+            String message = "Turn Right";
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 POST(json.toString(), message);
@@ -239,7 +294,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
         rollLeftBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "rollLeft");
-            String message = "Drone Roll Left";
+            String message = "Roll Left";
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 POST(json.toString(), message);
@@ -248,14 +304,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
         rollRightBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "rollRight");
-            String message = "Drone Roll Right";
+            String message = "Roll Right";
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 POST(json.toString(), message);
                 return false;
             }
         });
-        videoBtn.setOnClickListener(new View.OnClickListener(){
+        videoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 JSONObject json = ConnectActivity.getJSONObject("ACTION", "video");
@@ -263,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 POST(json.toString(), message);
             }
         });
-        pictureBtn.setOnClickListener(new View.OnClickListener(){
+        pictureBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 JSONObject json = ConnectActivity.getJSONObject("ACTION", "picture");
@@ -271,7 +328,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 POST(json.toString(), message);
             }
         });
-        returnHomeBtn.setOnClickListener(new View.OnClickListener(){
+        returnHomeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 JSONObject json = ConnectActivity.getJSONObject("ACTION", "returnHome");
@@ -289,11 +346,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public void textToSpeech(String text) {
-        Log.d("TEXTSPEECH", text);
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
     }
 
-    public void micButtonClicked(View v){
+    public void micButtonClicked(View v) {
         startVoiceRecognitionActivity();
     }
 
@@ -306,27 +362,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK)
-        {
-            // Populate the String values the recognition engine thought it heard
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             ArrayList<String> matches = data.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
             String word = matches.get(0);
             showAToast(word);
             JSONObject json = ConnectActivity.getJSONObject("ACTION", word);
             POST(json.toString(), null);
-       }
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void POST(String json, String message){
+    private void POST(String json, String message) {
         String response = null;
         String[] myParams = {url, json};
         try {
             response = new PostResponseToServer().execute(myParams).get();
-        } catch (Exception e) {e.printStackTrace();}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (message != null) {
             if (response != null) {
                 showAToast(message);
@@ -336,7 +391,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    public void showAToast (String message){
+    public void showAToast(String message) {
         if (mToast != null) {
             mToast.cancel();
         }
@@ -348,7 +403,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onResume() {
         super.onResume();
-        if (tiltBtn.isChecked()){
+        if (item.equals("Co-operative")) {
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
             sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
@@ -374,12 +429,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private double degreesTilt(double degrees) {
-        // Tilted back towards user more than -30 deg
         if (degrees < -30) {
             degrees = -30;
-        }
-        // Tilted forward past 30 deg
-        else if (degrees > 30) {
+        } else if (degrees > 30) {
             degrees = 30;
         }
         return degrees;
@@ -415,41 +467,55 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             Log.d(TAG, "getRotationMatrix() failed");
             return;
         }
-
         double x = event.values[0];
         double y = event.values[1];
         double z = event.values[2];
-
-        double a = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)) - 9.8;
+        double a = (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)) - 9.8) / 9.8;
         Date timeNow = new Date(System.currentTimeMillis());
-        long timeDelta = timeNow.getTime()-lastUpdate.getTime();
+        long timeDelta = timeNow.getTime() - lastUpdate.getTime();
         lastUpdate.setTime(timeNow.getTime());
-        double deltaVelocity = appliedAcceleration*timeDelta/1000;
+        double deltaVelocity = appliedAcceleration * timeDelta / 1000;
         appliedAcceleration = (float) a;
-
         float orientation[] = new float[9];
         SensorManager.getOrientation(R, orientation);
         float pitch = orientation[1];
         double pitchDeg = degreesTilt(Math.toDegrees(pitch));
-        if (pitchDeg < 0){
-            velocity -= deltaVelocity;
+        count += 1;
+        if (count == 10) {
+            velocityList.add(deltaVelocity);
+            avgVelocity(velocityList);
+            velocityList = new ArrayList<>();
+            if (pitchDeg < 0) {
+                velocity -= avgVelocity;
+            } else {
+                velocity += avgVelocity;
+            }
+            tvTilt.setText("Tilt Degrees: " + String.valueOf(pitchDeg) + ", Tilt Velocity: "
+                    + String.valueOf(velocity));
+            jsonTilt = ConnectActivity.getJSONObject("ACTION", "tiltValue");
+            try {
+                jsonTilt.put("ROLL", String.valueOf(pitchDeg));
+                jsonTilt.put("VELOCITY", String.valueOf(velocity));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            count = 0;
         } else {
-            velocity += deltaVelocity;
+            velocityList.add(deltaVelocity);
         }
-        tvTilt.setText("Tilt: " + String.valueOf(pitchDeg));
-        jsonTilt = ConnectActivity.getJSONObject("ACTION", "tiltValue");
-        try {
-            jsonTilt.put("ROLL", String.valueOf(pitchDeg));
-            jsonTilt.put("VELOCITY",String.valueOf(velocity));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        Log.v("JSONTILT", jsonTilt.toString());
     }
 
-    private void PostTiltValue(){
+    private void avgVelocity(ArrayList<Double> velocityArray) {
+        double sumVelocity = 0;
+        for (int i = 0; i < velocityArray.size(); i++) {
+            sumVelocity += velocityArray.get(i);
+        }
+        avgVelocity = sumVelocity / velocityArray.size();
+    }
+
+    private void PostTiltValue() {
         tiltThread = new Thread(new Runnable() {
-            public void run(){
+            public void run() {
                 while (true) {
                     if (stopReq) return;
                     if (jsonTilt != null) POST(jsonTilt.toString(), null);
@@ -460,5 +526,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
 }

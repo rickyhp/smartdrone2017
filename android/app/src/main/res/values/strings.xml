@@ -1,3 +1,38 @@
 <resources>
     <string name="app_name">SmartDrone</string>
+    <string name="tilt">Tilt: Mode Off</string>
+    <string name="tiltOn">Tilt On</string>
+    <string name="tiltOff">Tilt Off</string>
+    <string name="takeOff">Take Off</string>
+    <string name="land">Land</string>
+    <string name="arm">Arm</string>
+    <string name="disarm">Disarm</string>
+    <string name="sensor">Sensors</string>
+    <string name="rtl">RTL</string>
+    <string name="ok">OK</string>
+    <string name="altVal">Enter altitude values</string>
+    <string name="radiusVal">Enter radius and altitude</string>
+    <string name="ipText">IP Address  to connect to Drone</string>
+    <string name="ipTextHint">Eg:192.168.43.53</string>
+    <string name="ipTextVal">192.168.43.148</string>
+    <string name="portText">Port number  to connect to Drone</string>
+    <string name="portTextHint">Eg:8080</string>
+    <string name="portTextVal">8080</string>
+    <string name="connect">Connect</string>
+    <string name="submit">Submit Co-ordinates</string>
+    <string name="sensorVal">Sensor Values</string>
+    <string name="sensor1">Ultrasonic Sensor 1</string>
+    <string name="sensor2">Ultrasonic Sensor 2</string>
+    <string name="sensor3">Ultrasonic Sensor 3</string>
+    <string name="sensor4">Ultrasonic Sensor 4</string>
+    <string name="temperature">Temperature</string>
+    <string name="humidity">Humidity</string>
+    <string-array name="flight_modes">
+        <item>Stabilize</item>
+        <item>Co-operative</item>
+        <item>3D Scan</item>
+        <item>Circle</item>
+        <item>Loiter</item>
+        <item>Altitude Hold</item>
+    </string-array>
 </resources>
