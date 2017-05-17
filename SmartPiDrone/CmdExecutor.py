@@ -52,15 +52,15 @@ class CmdExecutor:
 
     def connect(self):
         print "Connecting to Pixhawk.... \r\n\n"
-        #self.pixhawkCmd.connect(connstring)
+        self.pixhawkCmd.connect('udp:127.0.0.1:14549')
         # Connect Pixhawk via UDP (connect to sitl)
         #self.vehicle = connect('udp:127.0.0.1:14549', wait_ready=True)
         #Connect Pixhawk via Serial
-        self.vehicle = self.pixhawkCmd.connect('/dev/ttyS0')
+        #self.vehicle = self.pixhawkCmd.connect('/dev/ttyS0')
         #pixhawkCmd.connect('/dev/ttyS0')
 
         
-    def disconnect():
+    def disconnect(self):
         print "Disconnecting from Drone.... \r\n\n"
         #self.vehicle.close()
         
@@ -73,29 +73,37 @@ class CmdExecutor:
         print "Disarm motor.... \r\n\n"
         self.pixhawkCmd.disarm()
         
-    def forward():
+    def forward(self):
         print "Going forward.... \r\n\n"
-
-    def reverse():
+        self.pixhawkCmd.forward()
+        
+    def reverse(self):
         print "Going reverse.... \r\n\n"
+        self.pixhawkCmd.reverse()
 
-    def left():
+    def left(self):
         print "Going left.... \r\n\n"
+        self.pixhawkCmd.left()
 
-    def right():
+    def right(self):
         print "Going right.... \r\n\n"
+        self.pixhawkCmd.right()
 
-    def up():
+    def up(self):
         print "Going up.... \r\n\n"
-
-    def down():
+        self.pixhawkCmd.up()
+        
+    def down(self):
         print "Going down.... \r\n\n"
+        self.pixhawkCmd.down()
 
-    def rotateLeft():
+    def rotateLeft(self):
         print "Rotate left.... \r\n\n"
-
-    def rotateRight():
+        self.pixhawkCmd.rotateLeft(30)
+        
+    def rotateRight(self):
         print "Rotate right.... \r\n\n"
+        self.pixhawkCmd.rotateRight(30)
 
 
     def rollLeft():
@@ -106,9 +114,10 @@ class CmdExecutor:
         print "Roll right.... \r\n\n"
 
 
-    def takeoff():
+    def takeoff(self):
         print "Taking off.....\r\n\n"
-
+        self.pixhawkCmd.takeoff(10)
+        
     def land():
         print "Landing.....\r\n\n"     
         
@@ -174,5 +183,13 @@ class CmdExecutor:
     
 # test cases
 #testCmd = CmdExecutor()
-#testCmd.connect('udp:127.0.0.1:14549') #connect to sitl
+#testCmd.connect() #connect to sitl
+#testCmd.arm()
+#testCmd.takeoff()
+#testCmd.rotateLeft()
+#testCmd.left()
+#time.sleep(5)
+#testCmd.right()
+#time.sleep(5)
 #testCmd.disconnect() #disconnect
+
