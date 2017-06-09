@@ -18,6 +18,9 @@ import tornado.ioloop
 import json
 import ast
 import random
+from PIL import Image
+from StringIO import StringIO
+import base64
 #from PixhawkCmd import PixhawkCmd
 from new_mission import createFile as createMissionFile
 
@@ -59,6 +62,7 @@ class IndexPageHandler(tornado.web.RequestHandler):
         self.write({"REPLY":"SmartDrone"})
     
     def post(self):
+        reply = None
         data = {"ACTION": ""}
         commands = ['up', 'down', 'left', 'right', 'arm', 'disarm', 'video', 'picture',
                     'forward', 'reverse', 'connect', 'autoTakeoff', 'autoLand',
@@ -104,14 +108,28 @@ class IndexPageHandler(tornado.web.RequestHandler):
                 reply = {"REPLY" : "Command received: " + data["ACTION"]}
                 #pixcmd.connect('/dev/ttyAMA0', baud=57600, wait_ready=True)
                 print "drone connected"
+            elif data["ACTION"] == "picture":
+                with open("image.jpg", "rb") as imageFile:
+                    string = base64.b64encode(imageFile.read())
+                    self.write(string)
+##                img_name = "image.jpg"
+##                img = pygame.image.load(img_name)
+##                str_img = pygame.image.tostring(img, "RGB")
+##                size = img.get_size()
+##                fimg = Image.frombytes("RGB", size, str_img, "raw")
+##                fobj = StringIO.StringIO()
+##                fimg.save(fobj, format="png")  #jpeg encoder isn't available in my install...
+                #self.write(fobj.getvalue())
+                #self.set_header("Content-type",  "image/png")
             else:
                 reply = {"REPLY" : "Command received: " + data["ACTION"]}
         else:
             reply = {"REPLY" : "command not recognized"}
-        reply = json.dumps(reply)
-        print reply
-        self.write(reply)
-        self.finish()
+        if reply:
+            reply = json.dumps(reply)
+            print reply
+            self.write(reply)
+            self.finish()
  
 class Application(tornado.web.Application):
     def __init__(self):

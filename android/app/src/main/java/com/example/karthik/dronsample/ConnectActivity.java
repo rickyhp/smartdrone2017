@@ -15,7 +15,7 @@ public class ConnectActivity extends AppCompatActivity {
     AutoCompleteTextView txtIpAddress;
     AutoCompleteTextView txtPort;
     Button btnConnect;
-    private String response;
+    public String response;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,16 +37,16 @@ public class ConnectActivity extends AppCompatActivity {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-//                    if (response != null) {
+                    if (response != null) {
                         Toast.makeText(ConnectActivity.this, "Connection Established",
                                 Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         intent.putExtra("URL", getUrl());
                         startActivity(intent);
-//                    } else {
-//                        Toast.makeText(ConnectActivity.this, "Network Failure",
-//                                Toast.LENGTH_SHORT).show();
-//                    }
+                    } else {
+                        Toast.makeText(ConnectActivity.this, "Network Failure",
+                                Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });

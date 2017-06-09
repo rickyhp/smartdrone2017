@@ -1,19 +1,25 @@
 package com.example.karthik.dronsample;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Base64;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,10 +32,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-
+import android.Manifest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,8 +45,14 @@ import java.util.Locale;
 
 import static com.example.karthik.dronsample.R.id.linearLayoutEdit;
 
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener,
         TextToSpeech.OnInitListener {
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
     private ToggleButton armToggleBtn, takeOffToggleBtn;
     private Toast mToast;
     private TextView tvTilt;
@@ -58,11 +72,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private String item = "Stabilize";
     private String previousItem = "Stabilize";
     public static String url;
+    public static Bitmap decodedByte;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        verifyStoragePermissions(this);
 
         //Initialize all the variables
         Button mapBtn = (Button) findViewById(R.id.btnMap);
@@ -325,7 +341,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View v) {
                 JSONObject json = ConnectActivity.getJSONObject("ACTION", "picture");
                 String message = "Image Captured";
-                POST(json.toString(), message);
+                String response = POST(json.toString(), message);
+                byte[] decodedString = Base64.decode(response, Base64.DEFAULT);
+                decodedByte = BitmapFactory.decodeByteArray(decodedString, 0,
+                        decodedString.length);
+                saveToStorage();
             }
         });
         returnHomeBtn.setOnClickListener(new View.OnClickListener() {
@@ -336,6 +356,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 POST(json.toString(), message);
             }
         });
+    }
+
+    private String saveToStorage(){
+        File directory = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        String imgName = "image_" + String.valueOf(new Date().getTime()) + ".jpg";
+        File myPath=new File(directory, imgName);
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(myPath);
+            decodedByte.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return directory.getAbsolutePath();
     }
 
     @Override
@@ -374,7 +415,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void POST(String json, String message) {
+    private String POST(String json, String message) {
         String response = null;
         String[] myParams = {url, json};
         try {
@@ -389,6 +430,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 showAToast(message);
             }
         }
+        return response;
     }
 
     public void showAToast(String message) {
@@ -527,5 +569,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
     }
 }
