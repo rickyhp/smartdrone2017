@@ -16,7 +16,7 @@ from DroneData import *
 from CmdExecutor import *
 
 
-obstacle_allowance = 25#Set 25 cm allowance for object
+obstacle_allowance = 50#Set 50 cm allowance for object
 
 def DummyThread(param):
     while 1:
@@ -126,12 +126,14 @@ def Sonar4Thread(sonar_object,dronedata):
         print("Sonar-4 :  %s cm\r\n" %sonar_object.object_distance)
         time.sleep(0.2)
 
-def HumidityAM2302Thread(hud_sensor):
+def HumidityAM2302Thread(hud_sensor,dronedata):
     while 1:
         # Try to grab a sensor reading.  Use the read_retry method which will retry up
         # to 15 times to get a sensor reading (waiting 2 seconds between each retry).
         humidity, temperature = Adafruit_DHT.read_retry(hud_sensor, 25)
 
+        dronedata.humidity = humidity
+        dronedata.temperature = temperature
         # Note that sometimes you won't get a reading and
         # the results will be null (because Linux can't
         # guarantee the timing of calls to read the sensor).  

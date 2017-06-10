@@ -76,7 +76,7 @@ def main():
             thread.start_new_thread(SocketServeContinuousThread, (webserver, dronedata, timestamp ,commandexecutor, 2, ))
             thread.start_new_thread(performOperationThread, (commandexecutor, dronedata, )) 
 
-            #thread.start_new_thread(HumidityAM2302Thread, (HudTempSensor, )) 
+            thread.start_new_thread(HumidityAM2302Thread, (HudTempSensor,dronedata, )) 
             thread.start_new_thread(Sonar1Thread, (sonar1,dronedata, ))
             thread.start_new_thread(Sonar2Thread, (sonar2,dronedata, ))
             thread.start_new_thread(Sonar3Thread, (sonar3,dronedata, ))
