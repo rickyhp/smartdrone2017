@@ -109,7 +109,16 @@ class Webserver:
 		print mapList, relAltList, absAltList		
                 #for item in range(len(commandexecutor.locMap)):
                 #    location[item] = commandexecutor.locMap[item]
-                #    print "latitude and longitude : ", location[item]          
+                #    print "latitude and longitude : ", location[item]
+
+            if commandexecutor.cmd =='picture':
+                camera = picamera.PiCamera()
+                camera.resolution = (1920, 1080)
+                camera.capture(r'/home/pi/image.jpg')
+                time.sleep(2.0)
+                with open("image.jpg", "rb") as imageFile:
+                    string = base64.b64encode(imageFile.read())
+                    client.sendall(string)
 
             #Send drone data out when 'getLocation' command is received
             if commandexecutor.cmd =='getLocation':
