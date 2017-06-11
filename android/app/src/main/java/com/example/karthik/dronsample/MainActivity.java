@@ -15,6 +15,7 @@ import android.hardware.SensorManager;
 import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -38,13 +39,13 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import static com.example.karthik.dronsample.R.id.linearLayoutEdit;
-
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener,
         TextToSpeech.OnInitListener {
@@ -80,7 +81,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
         verifyStoragePermissions(this);
 
-        //Initialize all the variables
         Button mapBtn = (Button) findViewById(R.id.btnMap);
         Button micBtn = (Button) findViewById(R.id.btnMic);
         Button videoBtn = (Button) findViewById(R.id.btnVideo);
@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
         leftBtn.setOnTouchListener(new View.OnTouchListener() {
             JSONObject json = ConnectActivity.getJSONObject("ACTION", "left");
-            String message = "Drone turn Left";
+            String message = "Turn Left";
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -309,8 +309,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
         rollLeftBtn.setOnTouchListener(new View.OnTouchListener() {
-            JSONObject json = ConnectActivity.getJSONObject("ACTION", "rollLeft");
-            String message = "Roll Left";
+            JSONObject json = ConnectActivity.getJSONObject("ACTION", "rotate left");
+            String message = "Rotate left";
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -319,8 +319,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
         rollRightBtn.setOnTouchListener(new View.OnTouchListener() {
-            JSONObject json = ConnectActivity.getJSONObject("ACTION", "rollRight");
-            String message = "Roll Right";
+            JSONObject json = ConnectActivity.getJSONObject("ACTION", "rotate right");
+            String message = "Rotate right";
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -332,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onClick(View v) {
                 JSONObject json = ConnectActivity.getJSONObject("ACTION", "video");
-                String message = "Video Record";
+                String message = "Video stream initiated";
                 POST(json.toString(), message);
             }
         });
@@ -353,13 +353,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         returnHomeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                JSONObject json = ConnectActivity.getJSONObject("ACTION", "returnHome");
-                String message = "return Home";
+                JSONObject json = ConnectActivity.getJSONObject("ACTION", "return home");
+                String message = "Return to Launch";
                 POST(json.toString(), message);
             }
         });
     }
 
+    @NonNull
     private String saveToStorage(){
         File directory = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES);
@@ -372,10 +373,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                fos.close();
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return directory.getAbsolutePath();
@@ -574,11 +577,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public static void verifyStoragePermissions(Activity activity) {
-        // Check if we have write permission
         int permission = ActivityCompat.checkSelfPermission(activity,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
             ActivityCompat.requestPermissions(
                     activity,
                     PERMISSIONS_STORAGE,

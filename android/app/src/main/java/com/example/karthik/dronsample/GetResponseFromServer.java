@@ -9,6 +9,8 @@ import okhttp3.Response;
 
 class GetResponseFromServer extends AsyncTask<String, Void, String> {
 
+    private static final String TAG = "GetResponse";
+
     @Override
     protected String doInBackground(String...params) {
         String responseString = null;
@@ -20,9 +22,9 @@ class GetResponseFromServer extends AsyncTask<String, Void, String> {
         try {
             Response response = client.newCall(request).execute();
             responseString = response.body().string();
-            Log.v("ResponseFromServer", responseString);
+            Log.v(TAG, responseString);
         } catch (Exception e) {
-            Log.v("ResponseFromServer", "Network Failure");
+            Log.v(TAG, "Network Failure");
             e.printStackTrace();
         }
         return responseString;

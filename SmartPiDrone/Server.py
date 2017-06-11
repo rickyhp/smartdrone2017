@@ -141,7 +141,7 @@ class Webserver:
                 camera.capture(r'/home/pi/image.jpg')
                 time.sleep(2.0)
                 camera.close()
-                with open(r"/home/pi/image.jpg", "rb") as imageFile:
+                with open(r'image.jpg', 'rb') as imageFile:
                     string = base64.b64encode(imageFile.read())
                     client.sendall(string)
 

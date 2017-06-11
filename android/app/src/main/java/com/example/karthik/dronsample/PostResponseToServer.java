@@ -13,6 +13,8 @@ import okhttp3.Response;
 
 class PostResponseToServer extends AsyncTask<String, Void, String> {
 
+    private static final String TAG = "PostResponse";
+
     @Override
     protected String doInBackground(String...params) {
         String responseString = null;
@@ -32,10 +34,10 @@ class PostResponseToServer extends AsyncTask<String, Void, String> {
             Response response = client.newCall(request).execute();
             if (response.body() != null) {
                 responseString = response.body().string();
-                Log.v("POSTTOSERVER", responseString);
+                Log.v(TAG, responseString);
             }
         } catch (Exception e) {
-            Log.v("POSTTOSERVER", e.toString());
+            Log.v(TAG, e.toString());
             e.printStackTrace();
         }
         return responseString;

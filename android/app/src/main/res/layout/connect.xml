@@ -37,8 +37,7 @@
             android:layout_marginTop="10dp"
             android:digits="0123456789."
             android:hint="@string/ipTextHint"
-            android:inputType="text"
-            android:text="@string/ipTextVal" />
+            android:inputType="text" />
 
         <TextView
             android:id="@+id/tv_PortNumber"
@@ -59,8 +58,7 @@
             android:layout_marginTop="10dp"
             android:ems="10"
             android:hint="@string/portTextHint"
-            android:inputType="number"
-            android:text="@string/portTextVal" />
+            android:inputType="number" />
 
         <Button
             android:id="@+id/btnConnect"
