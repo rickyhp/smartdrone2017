@@ -68,12 +68,12 @@ public class SensorActivity extends AppCompatActivity{
             String response = POST(json.toString(), null);
             JSONObject jsonResponse = new JSONObject(response);
             JSONObject sensor = jsonResponse.getJSONObject("SENSOR");
-            sensorData.put("SENSOR1", sensor.getString("sonar-1"));
-            sensorData.put("SENSOR2", sensor.getString("sonar-2"));
-            sensorData.put("SENSOR3", sensor.getString("sonar-3"));
-            sensorData.put("SENSOR4", sensor.getString("sonar-4"));
-            sensorData.put("HUMIDITY", sensor.getString("humidity"));
-            sensorData.put("TEMPERATURE", sensor.getString("temperature"));
+            sensorData.put("SENSOR1", sensor.getString("SENSOR1"));
+            sensorData.put("SENSOR2", sensor.getString("SENSOR2"));
+            sensorData.put("SENSOR3", sensor.getString("SENSOR3"));
+            sensorData.put("SENSOR4", sensor.getString("SENSOR4"));
+            sensorData.put("HUMIDITY", sensor.getString("HUMIDITY"));
+            sensorData.put("TEMPERATURE", sensor.getString("TEMPERATURE"));
         } catch (Exception e){
             e.printStackTrace();
             Log.d(TAG, e.toString());
