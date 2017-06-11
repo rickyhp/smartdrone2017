@@ -18,6 +18,7 @@ import cgitb
 from DroneData import *
 from CmdExecutor import *
 import ast
+import picamera
 from new_mission import createFile
 
 
