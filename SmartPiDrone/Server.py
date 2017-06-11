@@ -111,12 +111,35 @@ class Webserver:
                 #    location[item] = commandexecutor.locMap[item]
                 #    print "latitude and longitude : ", location[item]
 
-            if commandexecutor.cmd =='picture':
+            if commandexecutor.cmd =='getSensor':
+                temperature = dronedata.getTemperature()
+                humidity = dronedata.getHumidity()
+                sensor1 = dronedata.getSonar1_ObsDistance()
+                sensor2 = dronedata.getSonar2_ObsDistance()
+                sensor3 = dronedata.getSonar3_ObsDistance()
+                sensor4 = dronedata.getSonar4_ObsDistance()
+                dicData = ["SENSOR": {"SENSOR1": str(sensor1), "SENSOR2": str(sensor2),
+                                      "SENSOR3": str(sensor3), "SENSOR4": str(sensor4),
+                                      "HUMIDITY": str((humidity), "TEMPERATURE": str(temperature)}]
+                print "Sending sensor data....\r\n"
+                client.sendall(json.dumps(dicData))# Send data  out in json format
+                print(json.dumps(dicData))
+                print "Size of transmitted Jason array : ", len(dicData),"\r\n"
+
+            if commandexecutor.cmd == 'connect':
+                dicData = {"REPLY": "Connection established"}
+                client.sendall(json.dumps(dicData))# Send data  out in json format
+                print(json.dumps(dicData))
+                print "Size of transmitted Jason array : ", len(dicData),"\r\n"
+
+            #take picture and send it back to app    
+            if commandexecutor.cmd == 'picture':
                 camera = picamera.PiCamera()
                 camera.resolution = (1920, 1080)
                 camera.capture(r'/home/pi/image.jpg')
                 time.sleep(2.0)
-                with open("image.jpg", "rb") as imageFile:
+                camera.close()
+                with open(r"/home/pi/image.jpg", "rb") as imageFile:
                     string = base64.b64encode(imageFile.read())
                     client.sendall(string)
 
