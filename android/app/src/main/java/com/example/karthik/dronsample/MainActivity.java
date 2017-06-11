@@ -342,10 +342,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 JSONObject json = ConnectActivity.getJSONObject("ACTION", "picture");
                 String message = "Image Captured";
                 String response = POST(json.toString(), message);
-                byte[] decodedString = Base64.decode(response, Base64.DEFAULT);
-                decodedByte = BitmapFactory.decodeByteArray(decodedString, 0,
-                        decodedString.length);
-                saveToStorage();
+                if (response != null) {
+                    byte[] decodedString = Base64.decode(response, Base64.DEFAULT);
+                    decodedByte = BitmapFactory.decodeByteArray(decodedString, 0,
+                            decodedString.length);
+                    saveToStorage();
+                }
             }
         });
         returnHomeBtn.setOnClickListener(new View.OnClickListener() {

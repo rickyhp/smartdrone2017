@@ -19,6 +19,7 @@ from DroneData import *
 from CmdExecutor import *
 import ast
 import picamera
+import base64
 from new_mission import createFile
 
 
@@ -119,9 +120,9 @@ class Webserver:
                 sensor2 = dronedata.getSonar2_ObsDistance()
                 sensor3 = dronedata.getSonar3_ObsDistance()
                 sensor4 = dronedata.getSonar4_ObsDistance()
-                dicData = ["SENSOR": {"SENSOR1": str(sensor1), "SENSOR2": str(sensor2),
+                dicData = {"SENSOR": {"SENSOR1": str(sensor1), "SENSOR2": str(sensor2),
                                       "SENSOR3": str(sensor3), "SENSOR4": str(sensor4),
-                                      "HUMIDITY": str((humidity), "TEMPERATURE": str(temperature)}]
+                                      "HUMIDITY": str(humidity), "TEMPERATURE": str(temperature)}}
                 print "Sending sensor data....\r\n"
                 client.sendall(json.dumps(dicData))# Send data  out in json format
                 print(json.dumps(dicData))
