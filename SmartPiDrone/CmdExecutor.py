@@ -68,6 +68,8 @@ class CmdExecutor:
     def arm(self):
         print "Arming motor.... \r\n\n"
         self.pixhawkCmd.arm()
+    def Stabilize():
+        print "Stabilizing drone....\r\n\n"
         
     def disarm(self):
         print "Disarm motor.... \r\n\n"
@@ -150,6 +152,7 @@ class CmdExecutor:
                 'connect':connect,
                 'arm':arm,
                 'disarm':disarm,
+                'Stabilize':Stabilize,
                 'takeoff':takeoff,
                 'land':land,
                 'forward':forward,
